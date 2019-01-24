@@ -1,0 +1,112 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/zz_activity_main_bg" >
+
+    <TextView
+        android:id="@+id/zz_tv_order_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="70dp"
+        android:layout_marginTop="60dp"
+        android:text="订购记录"
+        android:textColor="@android:color/white"
+        android:textSize="30sp" >
+    </TextView>
+    
+    <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="您还没有订购记录，请返回。"
+        android:textSize="30sp"
+        android:id="@+id/zz_tv_order_nohistory"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:textColor="@android:color/white"
+        ></TextView>
+
+    <LinearLayout
+        android:id="@+id/zz_ll_order_tablehead"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="46dp"
+        android:layout_marginLeft="150dp"
+        android:layout_below="@id/zz_tv_order_title"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:text="订单名称/订单号" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="256dp"
+            android:layout_height="wrap_content"
+            android:text="订单类型" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="106dp"
+            android:text="价格" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="58dp"
+            android:layout_height="wrap_content"
+            android:text="产品ID" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:layout_marginLeft="178dp"
+            android:layout_height="wrap_content"
+            android:text="有效期" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/zz_iv_order_up"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="22dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zz_ll_order_tablehead"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/zz_order_up" >
+    </ImageView>
+    
+    <ListView android:layout_width="match_parent"
+        android:layout_height="425dp"
+        android:layout_marginTop="16dp"
+        android:layout_below="@id/zz_iv_order_up"
+        android:scrollbars="none"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:listSelector="@android:color/transparent"
+		android:divider="@android:color/transparent"
+		android:dividerHeight="10dp"        
+        android:layout_marginLeft="104dp"
+        android:layout_marginRight="104dp"
+        android:id="@+id/zz_lv_order"
+        ></ListView>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/zz_iv_order_down"
+        android:layout_marginBottom="40dp"
+        android:src="@drawable/zz_order_down" >
+    </ImageView>
+
+</RelativeLayout>

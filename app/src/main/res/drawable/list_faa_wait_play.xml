@@ -1,0 +1,10 @@
+<animation-list android:oneshot="false" xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:drawable="@drawable/wheel0" android:duration="160" />
+	<item android:drawable="@drawable/wheel0" android:duration="160" />
+	<item android:drawable="@drawable/wheel1" android:duration="160" />
+	<item android:drawable="@drawable/wheel1" android:duration="160" />
+	<item android:drawable="@drawable/wheel2" android:duration="160" />
+	<item android:drawable="@drawable/wheel2" android:duration="160" />
+	<item android:drawable="@drawable/wheel3" android:duration="160" />
+	<item android:drawable="@drawable/wheel3" android:duration="160" />
+</animation-list>

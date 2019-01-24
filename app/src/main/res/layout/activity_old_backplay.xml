@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <com.xike.xkliveplay.arcplay.ArcSurfaceView
+        android:id="@+id/VideoView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center" />
+
+    <ImageView
+        android:id="@+id/faa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="40px"
+        android:layout_marginRight="40px"
+        android:background="@drawable/list_faa_wait_play"
+        android:visibility="invisible" />
+
+    <RelativeLayout
+        android:id="@+id/rl_backplay_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/backplay_old_bg" >
+
+ 
+
+        <!-- android:background="@drawable/backplay_bg" -->
+
+        <TextView
+            android:id="@+id/tv_backplay_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="140px"
+            android:layout_marginTop="15px"
+            android:text="@string/backplay"
+            android:textColor="@color/white"
+            android:textSize="36px" />
+
+        <LinearLayout
+            android:id="@+id/ll_backplay"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@id/tv_backplay_title"
+            android:layout_marginTop="6px"
+            android:orientation="horizontal" >
+
+            <include
+                android:layout_width="361px"
+                android:layout_height="wrap_content"
+                layout="@layout/backplay_channel" />
+
+            <include
+                android:id="@+id/backplay_date"
+                android:layout_width="291px"
+                android:layout_height="wrap_content"
+                layout="@layout/backplay_date" >
+            </include>
+
+            <include
+                android:layout_width="628px"
+                android:layout_height="match_parent"
+                layout="@layout/backplay_schedule" >
+            </include>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="229px"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal|bottom"
+        layout="@layout/vol_seekbar" />
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center_horizontal|bottom"
+        layout="@layout/play_process_seekbar" />
+
+
+    <TextView
+        android:id="@+id/tv_backplay_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:layout_marginRight="65px"
+        android:layout_marginTop="96px"
+        android:background="@drawable/upright_corner_bg"
+        android:gravity="center"
+        android:text="回看"
+        android:textColor="#80dcdcdc"
+        android:textSize="26px"
+        android:visibility="gone" >
+    </TextView>
+    
+           <RelativeLayout
+            android:id="@+id/help"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/controler_help"
+            android:visibility="gone" >
+        </RelativeLayout>
+
+</FrameLayout>

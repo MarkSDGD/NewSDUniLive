@@ -1,0 +1,113 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="290dp"
+    android:layout_height="383dp"
+    android:background="@drawable/zz_product_item_unselect" >
+
+    <Button
+        android:id="@+id/zz_btn_productitem"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/zz_product_item_selector" />
+
+    <TextView
+        android:id="@+id/zz_tv_productitem_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="68dp"
+        android:text="直播单频道"
+        android:textColor="@android:color/white"
+        android:textSize="26sp" />
+
+    <LinearLayout
+        android:id="@+id/zz_ll_price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zz_tv_productitem_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:gravity="bottom"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/zz_tv_productitem_price_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="现价"
+            android:textColor="#eeb829"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <com.shandong.shandonglive.zengzhi.ui.ZZProductPriceView
+            android:id="@+id/zzprice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/zz_tv_productitem_name"
+            android:layout_centerHorizontal="true" >
+        </com.shandong.shandonglive.zengzhi.ui.ZZProductPriceView>
+
+        <TextView
+            android:id="@+id/zz_tv_productitem_price_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="元/路"
+            android:textColor="#eeb829"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/zz_rl_deletetext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zz_ll_price"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="18dp" >
+
+        <TextView
+            android:id="@+id/zz_tv_deletetext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="原价7元"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="2dp"
+            android:layout_alignLeft="@id/zz_tv_deletetext"
+            android:layout_alignRight="@id/zz_tv_deletetext"
+            android:layout_centerInParent="true"
+            android:background="#eeb829" >
+        </TextView>
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/zz_tv_produtct_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zz_rl_deletetext"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="30天"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" >
+    </TextView>
+
+    <TextView
+        android:id="@+id/zz_tv_product_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="68dp"
+        android:text="1个月内自有观看本频道"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" >
+    </TextView>
+
+</RelativeLayout>

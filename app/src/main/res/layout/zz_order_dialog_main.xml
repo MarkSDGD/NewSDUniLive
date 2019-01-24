@@ -1,0 +1,104 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="632dp"
+    android:layout_height="242dp"
+    android:background="@drawable/zz_reminder_bg" >
+
+    <RelativeLayout
+        android:id="@+id/zz_rl_order_dialog_head"
+        android:layout_width="632dp"
+        android:layout_height="50dp" >
+
+        <TextView
+            android:id="@+id/zz_tv_order_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:text="提示"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/zz_tv_order_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:text="SDtestydhwxc01"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zz_rl_order_dialog_head"
+        android:layout_marginLeft="58dp"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/zz_tv_order_channelname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="浙江卫视高清"
+                android:textColor="#eeb829"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/zz_tv_order_text1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:text="为付费频道，订购后即可观看"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/zz_tv_order_text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="是否前往订购页面？"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginRight="30dp"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/zz_order_dialog_btn_back"
+            android:layout_width="168dp"
+            android:layout_height="80dp"
+            android:background="@drawable/zz_order_dialog_selector_btn"
+            android:text="返 回"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/zz_order_dialog_btn_order"
+            android:layout_width="168dp"
+            android:layout_height="80dp"
+            android:background="@drawable/zz_order_dialog_selector_btn"
+            android:text="订 购"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+</RelativeLayout>

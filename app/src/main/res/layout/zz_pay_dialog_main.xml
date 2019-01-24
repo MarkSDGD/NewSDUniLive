@@ -1,0 +1,218 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="1280dp"
+    android:layout_height="720dp"
+    android:background="#80000000"
+     >
+
+    <RelativeLayout
+        android:layout_width="668dp"
+        android:layout_height="400dp"
+        android:background="@drawable/zz_paydialog_bg"
+        android:layout_centerInParent="true" >
+
+        <RelativeLayout
+            android:id="@+id/zz_rl_pay_dialog_head"
+            android:layout_width="668dp"
+            android:layout_height="50dp" >
+
+            <TextView
+                android:id="@+id/zz_tv_pay_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:text="话费支付，请确认订单信息："
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/zz_rl_paydialog_code"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_centerInParent="true"
+            android:visibility="invisible" >
+
+            <TextView
+                android:id="@+id/zz_tv_paydialog_codetext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="按【确定】获取二维码"
+                android:textColor="@android:color/white"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/zz_iv_paydialog_code"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_centerInParent="true" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/zz_ll_paydialog_info_root"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/zz_rl_pay_dialog_head"
+            android:layout_marginLeft="58dp"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical" >
+
+            <!-- 发起影片 -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发起频道："
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/zz_tv_pay_channelname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="大河"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- 产品包名 -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="产品包名："
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/zz_tv_pay_packagename"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="海看大片VIP包月"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- 产品类型 -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="产品类型："
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/zz_tv_pay_producttype"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- 发起日期 -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发起日期："
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/zz_tv_pay_productdate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2018-06-13 08:32:10"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp" />
+            </LinearLayout>
+
+            <!-- 其他信息 -->
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="发起影片："
+                    android:textSize="20sp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/zz_tv_pay_productid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="TVDY20Y"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/zz_tv_pay_contentid"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:text="smgpack00000000000000000000000281"
+                        android:textColor="@android:color/white"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/zz_pay_dialog_btn_phonepay"
+                android:layout_width="168dp"
+                android:layout_height="80dp"
+                android:background="@drawable/zz_order_dialog_selector_btn"
+                android:text="话 费"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+            <Button
+                android:id="@+id/zz_pay_dialog_btn_zhifubao"
+                android:layout_width="168dp"
+                android:layout_height="80dp"
+                android:background="@drawable/zz_order_dialog_selector_btn"
+                android:text="支付宝"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

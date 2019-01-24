@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/BaseLayout1"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <com.xike.xkliveplay.framework.arcplay.ArcSurfaceView
+        android:id="@+id/VideoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <RelativeLayout
+        android:id="@+id/liveplay_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:background="@drawable/load" >
+
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/px_456"
+            android:text=""
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_24" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/channel_bg"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <ImageView
+            android:id="@+id/faa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/px_46"
+            android:layout_marginRight="@dimen/px_50"
+            android:background="@drawable/list_faa_wait_play"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/noChannel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/nochannel"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:id="@+id/ll_channelNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="horizontal"
+            android:visibility="gone" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/channel_list"
+            android:layout_width="@dimen/px_389"
+            android:layout_height="match_parent"
+            android:background="@color/black_80"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <LinearLayout
+                android:id="@+id/ll"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/px_30"
+                android:gravity="center_horizontal" >
+
+                <ImageView
+                    android:id="@+id/iv_arrow_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/left_arrow" />
+
+                <TextView
+                    android:id="@+id/tv_channel_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/px_30"
+                    android:layout_marginRight="@dimen/px_30"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/live_channel_category_title_size" />
+
+                <ImageView
+                    android:id="@+id/iv_arrow_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:src="@drawable/right_arrow" />
+            </LinearLayout>
+
+            <com.xike.xkliveplay.activity.fragment.view.ViewLiveChannelList
+                android:id="@+id/lv_channel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
+        </LinearLayout>
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/px_146"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/px_389"
+            layout="@layout/live_channel_info" />
+
+        <LinearLayout
+            android:id="@+id/live_men"
+            android:layout_width="@dimen/px_214"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@color/black_80"
+            android:orientation="vertical" >
+
+            <FrameLayout
+                android:id="@+id/fl_save"
+                android:layout_width="@dimen/px_214"
+                android:layout_height="@dimen/px_72"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/px_350"
+                android:background="@drawable/channel_focus" >
+
+                <TextView
+                    android:id="@+id/tv_save"
+                    android:layout_width="@dimen/px_214"
+                    android:layout_height="@dimen/px_72"
+                    android:gravity="center"
+                    android:text="收        藏"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/menu_text_size" />
+
+                <TextView
+                    android:id="@+id/tv_save1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/px_72"
+                    android:layout_gravity="center_horizontal"
+                    android:drawableLeft="@drawable/save"
+                    android:drawablePadding="@dimen/px_5"
+                    android:gravity="center"
+                    android:text="已收藏"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/menu_text_size" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_back"
+                android:layout_width="@dimen/px_214"
+                android:layout_height="@dimen/px_72"
+                android:layout_marginTop="@dimen/px_30"
+                android:gravity="center"
+                android:text="回        看"
+                android:textColor="@color/white"
+                android:textSize="@dimen/menu_text_size" />
+            <TextView
+                android:id="@+id/tv_order_history"
+                android:layout_width="@dimen/px_214"
+                android:visibility="gone"
+                android:layout_height="@dimen/px_72"
+                android:layout_marginTop="@dimen/px_30"
+                android:gravity="center"
+                android:text="订购记录"
+                android:textColor="@color/white"
+                android:textSize="@dimen/menu_text_size" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <include
+        android:layout_width="@dimen/vol_bg_width"
+        android:layout_height="@dimen/vol_bg_height"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/px_22"
+        layout="@layout/vol_seekbar" />
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/timeshift_bg_height"
+        android:layout_gravity="bottom"
+        layout="@layout/timeshift_process_seekbar" />
+
+    <TextView
+        android:id="@+id/tv_liveplay_timeshift"
+        android:layout_width="@dimen/px_90"
+        android:layout_height="@dimen/px_50"
+        android:layout_gravity="top|right"
+        android:layout_marginRight="@dimen/px_38"
+        android:layout_marginTop="@dimen/px_80"
+        android:background="@color/black_50"
+        android:gravity="center"
+        android:text="时移"
+        android:textColor="#80dcdcdc"
+        android:textSize="@dimen/sp_23" >
+    </TextView>
+    <!--
+         <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:background="@drawable/upright_corner_bg"
+        android:gravity="center"
+        android:text="时移"
+        android:textColor="#80dcdcdc"
+        android:textSize="26px"
+         >
+    </TextView>
+    -->
+
+</FrameLayout>

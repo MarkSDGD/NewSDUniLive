@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="632dp"
+    android:layout_height="241dp"
+    android:background="@color/black_80"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="51dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="24dp"
+            android:text="提示"
+            android:textColor="@color/white"
+            android:textSize="21sp" />
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/update_line" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="37dp"
+        android:text="检测到可用更新。请更新应用以获得更佳体验。"
+        android:textColor="@color/white"
+        android:textSize="25sp" />
+
+    <Button
+        android:id="@+id/btn_update"
+        android:layout_width="138dp"
+        android:layout_height="48dp"
+        android:layout_gravity="right"
+        android:layout_marginRight="66dp"
+        android:layout_marginTop="35dp"
+        android:background="@drawable/update_btn_bg"
+        android:text="立即更新"
+        android:textColor="@color/white"
+        android:textSize="23sp" />
+
+</LinearLayout>

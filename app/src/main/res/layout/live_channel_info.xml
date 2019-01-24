@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/channel_info"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/black_80" >
+    
+    <LinearLayout 
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/px_20"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+	        android:layout_height="wrap_content">
+	  <LinearLayout
+	        android:id="@+id/ll_01"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:gravity="center_horizontal"
+	        android:orientation="vertical" >
+	        <TextView
+	            android:id="@+id/tv_channel_name"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:textColor="@color/white"
+	            android:textSize="@dimen/sp_32" />
+	
+	        <TextView
+	            android:id="@+id/tv_channel_num"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_marginTop="@dimen/px_5"
+	            android:textColor="@color/white"
+	            android:textSize="@dimen/sp_36"
+	            android:textStyle="bold" />
+	    </LinearLayout>
+	
+	    <LinearLayout
+	        android:layout_marginLeft="@dimen/px_30"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical" >
+	
+	        <TextView
+	            android:id="@+id/tv_channel_playing_info"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:maxLength="25"
+	            android:textSize="@dimen/sp_32"
+	            android:textColor="@color/white"/>
+	
+	        <TextView
+	            android:layout_marginTop="10dp"
+	            android:id="@+id/tv_channel_isplaying"
+	            android:layout_width="wrap_content"
+	            android:textSize="@dimen/sp_32"
+	            android:maxLength="25"
+	            android:layout_height="wrap_content"
+	            android:textColor="@color/white" />
+	    </LinearLayout>
+    </LinearLayout>
+   
+
+</RelativeLayout>

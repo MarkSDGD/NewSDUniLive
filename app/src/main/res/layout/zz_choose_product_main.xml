@@ -1,0 +1,66 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/zz_activity_main_bg"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_height="match_parent" >
+
+
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_marginTop="70dp"
+		android:layout_height="wrap_content"
+		android:gravity="bottom"
+		android:drawablePadding="10dp"
+		android:layout_centerHorizontal="true"
+		android:id="@+id/zz_tv_chooseproduct_maintitle"
+		android:textColor="#eeb829"
+		android:textSize="32sp"
+		android:drawableLeft="@drawable/zz_choose_product_crown"
+
+		/>
+ 	
+ 	<TextView 
+ 	    android:id="@+id/zz_tv_chooseproduct_subtitle"
+ 	    android:layout_width="wrap_content"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_centerHorizontal="true"
+ 	    android:layout_below="@id/zz_tv_chooseproduct_maintitle"
+ 	    android:layout_marginTop="15dp"
+ 	    android:textColor="@android:color/white"
+ 	    android:textSize="20sp"
+ 	    android:text="   购买海看直播VIP包即享会员专属特权，精彩独家直播任您欣赏。"
+ 	    />
+ 	
+ 	 	<TextView android:layout_width="300dp"
+ 	    android:layout_height="wrap_content"
+ 	    android:layout_centerHorizontal="true"
+ 	    android:id="@+id/zz_tv_chooseproduct_bottomline"
+ 	    android:textSize="16sp"
+		android:maxLines="2"
+		android:gravity="center_horizontal"
+ 	    android:textColor="@android:color/white"
+ 	    android:lineSpacingExtra="10dp"
+ 	    android:layout_alignParentBottom="true"
+ 	    android:layout_marginBottom="60dp"/>
+ 	
+
+ 	<HorizontalScrollView android:layout_width="match_parent"
+ 	    android:layout_marginTop="182dp"
+ 	    android:scrollbars="none"
+ 	    android:layout_height="wrap_content">
+ 	    
+ 	    <LinearLayout android:layout_width="match_parent"
+ 	        android:id="@+id/zz_ll_product_root"
+ 	        android:layout_height="wrap_content"
+ 	        android:orientation="horizontal">
+ 	        
+ 	    
+ 	    
+ 	    </LinearLayout>
+ 	    
+ 	</HorizontalScrollView>
+	
+</RelativeLayout>

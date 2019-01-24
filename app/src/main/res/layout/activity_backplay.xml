@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <com.xike.xkliveplay.framework.arcplay.ArcSurfaceView
+        android:id="@+id/VideoView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center" />
+
+    <ImageView
+        android:id="@+id/faa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="@dimen/px_46"
+        android:layout_marginRight="@dimen/px_50"
+        android:background="@drawable/list_faa_wait_play"
+        android:visibility="invisible" />
+
+    <RelativeLayout
+        android:id="@+id/rl_backplay_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/backplay_bg" >
+
+        <!-- android:background="@drawable/backplay_bg" -->
+
+        <TextView
+            android:id="@+id/tv_backplay_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/px_140"
+            android:layout_marginTop="@dimen/px_15"
+            android:text="@string/backplay"
+            android:textColor="@color/white"
+            android:textSize="@dimen/resee_text_size" />
+
+        <LinearLayout
+            android:id="@+id/ll_backplay"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@id/tv_backplay_title"
+            android:layout_marginTop="@dimen/px_6"
+            android:orientation="horizontal" >
+
+            <include
+                android:layout_width="@dimen/resee_channel_width"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/px_5"
+                layout="@layout/backplay_channel" />
+
+            <include
+                android:id="@+id/backplay_date"
+                android:layout_width="@dimen/resee_date_width"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/resee_date_week_margin_top"
+                layout="@layout/backplay_date" >
+            </include>
+
+            <include
+                android:layout_width="@dimen/resee_schedule_width"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/resee_schedule_margin_top"
+                layout="@layout/backplay_schedule" >
+            </include>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/timeshift_bg_height"
+        android:layout_gravity="bottom"
+        layout="@layout/play_process_seekbar" />
+
+    <include
+        android:layout_width="@dimen/px_480"
+        android:layout_height="@dimen/px_58"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="@dimen/px_22"
+        layout="@layout/vol_seekbar" />
+
+    <TextView
+        android:id="@+id/tv_backplay_icon"
+        android:layout_width="@dimen/px_90"
+        android:layout_height="@dimen/px_50"
+        android:layout_gravity="top|right"
+        android:layout_marginRight="@dimen/px_38"
+        android:layout_marginTop="@dimen/px_80"
+        android:background="@color/black_50"
+        android:gravity="center"
+        android:text="回看"
+        android:textColor="#80dcdcdc"
+        android:textSize="@dimen/sp_23"
+        android:visibility="gone" >
+    </TextView>
+
+</FrameLayout>

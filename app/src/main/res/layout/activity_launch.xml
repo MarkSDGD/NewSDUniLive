@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_liveplay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/load" >
+
+    <TextView
+        android:id="@+id/tv_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/px_456"
+        android:text=""
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_24" />
+
+    <ImageView
+        android:id="@+id/faa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/px_46"
+        android:layout_marginRight="@dimen/px_50"
+        android:background="@drawable/list_faa_wait_play" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/px_100" />
+
+</RelativeLayout>

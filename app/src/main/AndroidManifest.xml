@@ -1,0 +1,205 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	package="com.xike.xkliveplay"
+	android:versionCode="126"
+	android:versionName="CM-v1.2.6">
+     
+    <!-- android:versionCode="47"
+    android:versionName="CM-V1.0.8-debug_update" -->
+<!-- android:sharedUserId="android.uid.system" -->
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="15"
+		tools:overrideLibrary="com.mernake.framework"
+		/>
+    
+   	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/> 
+	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
+	<uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+    <uses-permission android:name="com.brlf.smartTV.remote"></uses-permission>
+        <!-- 缓存相关 -->
+    <uses-permission android:name="android.permission.CLEAR_APP_CACHE" />
+    <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
+    
+   	<!--  
+   	 android:sharedUserId="android.uid.system"
+   	<uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+   	-->
+    <application
+		android:name=".activity.UniApplication"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        
+        <!-- 老人机入口activity -->
+        <activity
+            android:name=".activity.live.ActivityRecentPlay"
+            android:theme="@style/SplashNoTitleBar"
+            android:label="@string/title_activity_main" >
+            <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
+        </activity>
+
+        <!-- 开机服务 -->
+       <service android:name=".framework.service.AuthenticationService"> 
+	        <intent-filter> 
+	                <action android:name="com.xike.AuthenticationService" /> 
+	                <category android:name="android.intent.category.default" /> 
+	        </intent-filter> 
+		</service>
+
+       <!-- 开机广播接收器 -->
+ 	  <receiver android:name=".framework.service.BootReceiver">
+         <intent-filter>  
+              <action android:name="android.intent.action.BOOT_COMPLETED"></action>  
+             <category android:name="android.intent.category.LAUNCHER" />  
+          </intent-filter>  
+      </receiver>   
+      
+                 <service android:name=".framework.service.LivePlayBackService"> 
+		</service>
+        <!-- 接收参数跳转的apk入口 -->
+	    <activity
+            android:name=".activity.launch.ActivityLaunch"
+            android:theme="@style/SplashNoTitleBar"
+            android:label="@string/title_activity_main" >
+			<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+	    </activity>  
+	    
+	    
+	    <activity
+            android:name=".activity.launch.TestActivity"
+            android:theme="@style/SplashNoTitleBar"
+            android:label="@string/title_activity_main" >
+			<!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
+	    </activity>  
+	    
+	    <service
+            android:name="com.brlf.smartTV.server.STBService"
+            android:enabled="true"
+            >
+        </service>
+	    
+	    	    <activity
+            android:name=".httpClient.TestInterface"
+            android:theme="@style/SplashNoTitleBar"
+            android:label="@string/title_activity_main" >
+			<!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
+	    </activity> 
+	    
+	    	    	    	    <activity
+            android:name="com.xike.xkliveplay.activity.dialogerror.DialogTest"
+            android:theme="@style/SplashNoTitleBar"
+            android:label="@string/title_activity_main" >
+		<!-- 	<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
+	    </activity> 
+	    
+	    	    
+	<!--    	<provider android:name="com.xike.xkliveplay.xunfei.XunfeiProvider"
+	   	    android:authorities="com.iflytek.xiri.provider.sdgd"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    ></provider> -->
+	    	    
+	   	
+<!-- 	   	<receiver android:name="com.xike.xkliveplay.xunfei.XunfeiReceiver"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    >
+	   	    <intent-filter >
+	   	        <action android:name="com.iflytek.xiri.action.LIVE"/>
+	   	        <data android:mimeType="xiri/com.iflytek.xiri.sdgd.livechannels"></data>
+	   	    </intent-filter>
+	   	</receiver> -->
+	   	
+	   		   	<provider android:name="com.xike.xkliveplay.xunfei.XunfeiProvider"
+	   	    android:authorities="com.iflytek.xiri.provider.sdmgd_uni"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    ></provider>
+	    	    
+	   	
+	   	<receiver android:name="com.xike.xkliveplay.xunfei.XunfeiReceiver"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    >
+	   	    <intent-filter >
+	   	        <action android:name="com.iflytek.xiri.action.LIVE"/>
+	   	        <data android:mimeType="xiri/com.iflytek.xiri.sdmgd.livechannels"></data>
+	   	    </intent-filter>
+	   	</receiver>
+	   	<receiver android:name="com.xike.xkliveplay.xunfei.XunfeiTVBackReceiver"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    >
+	   		   	    <intent-filter >
+	   	        <action android:name="com.iflytek.xiri.action.TVBACK"/>
+	   	        <data android:mimeType="xiri/com.iflytek.xiri.sdmgd.tvback"></data>
+	   	    </intent-filter>
+	   	</receiver>
+	   	<receiver android:name="com.xike.xkliveplay.framework.service.YinHeReceiver"
+	   	    android:enabled="true"
+	   	    android:exported="true"
+	   	    >
+	   	    <intent-filter >
+	   	        <action android:name="gitv.live.ACTION1"/>
+	   	       <category android:name="shandong"/>
+	   	    </intent-filter>
+	   	</receiver>
+	    	    
+	    <meta-data android:value="53abca6456240b97be039150" android:name="UMENG_APPKEY"></meta-data>
+		<meta-data android:value="CM_LIVEPLAY" android:name="UMENG_CHANNEL"/>
+		
+		
+		        <!--遥控器-->
+        <receiver
+            android:name="com.xike.xkliveplay.framework.service.yinhe.ControlReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.gitv.tv.REMOTE_ACTION" />
+
+                // 这个需要银河提供
+                <category android:name="hhL4146loS9IEUrdkVdIleTqZG2G" />
+            </intent-filter>
+        </receiver>
+		
+		
+    </application>
+    
+    
+
+</manifest>

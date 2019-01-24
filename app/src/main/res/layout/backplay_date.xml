@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/channel_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   
+     >
+
+    <LinearLayout
+        android:layout_width="@dimen/px_1"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:background="@color/backplay_spliter" >
+    </LinearLayout>
+
+    <ListView
+        android:layout_marginTop="@dimen/px_163"
+        android:id="@+id/lv_backplay_date"
+        android:layout_width="match_parent"
+        android:paddingLeft="@dimen/px_8"
+        android:paddingRight="@dimen/px_8"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:listSelector="@color/nocolor"
+        android:layout_centerVertical="true"
+         >
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="@dimen/px_1"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@color/backplay_spliter" >
+    </LinearLayout>
+
+</RelativeLayout>

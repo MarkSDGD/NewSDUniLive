@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/px_258"
+    android:layout_height="@dimen/px_54"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:paddingTop="@dimen/px_15"
+    android:paddingBottom="@dimen/px_15"
+    android:paddingLeft="@dimen/px_34"
+    android:paddingRight="@dimen/px_34"
+    android:background="@color/black_80"
+    android:orientation="vertical" >
+	
+    <TextView android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="再按一次退出程序"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_23"/>
+   
+
+</LinearLayout>

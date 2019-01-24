@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/px_90"
+    android:minWidth="@dimen/px_340"
+    android:orientation="horizontal" >
+    <LinearLayout 
+        android:id="@+id/ll_bg"
+        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:layout_height="fill_parent">
+        <TextView
+	        android:id="@+id/tv_channel_num"
+	        android:layout_width="@dimen/px_75"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="@dimen/px_27"
+	        android:gravity="center_vertical|right"
+	        android:textColor="@color/white"
+	        android:textSize="@dimen/px_40"
+	        android:textStyle="bold" />
+    
+	    <TextView
+	        android:id="@+id/tv_channel_name"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:gravity="center_vertical"
+	        android:layout_marginLeft="@dimen/px_15"
+	        android:layout_weight="1"
+	        android:ellipsize="marquee"
+	        android:focusableInTouchMode="true" 
+	        android:marqueeRepeatLimit="marquee_forever" 
+	        android:scrollHorizontally="true"
+	        android:singleLine="true"
+	        android:textColor="@color/white"
+	        android:textSize="@dimen/sp_36" />
+    </LinearLayout>
+    
+    <ImageView
+        android:id="@+id/iv_issave"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

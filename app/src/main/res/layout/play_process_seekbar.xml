@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_backplay_process_main"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/timeshift_bg_height"
+    android:layout_gravity="bottom" >
+
+    <!-- android:layout_height="229px" -->
+
+
+    <RelativeLayout
+        android:id="@+id/rl_backplay_process"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_height="match_parent"
+        android:background="@color/black_80" >
+
+        <com.xike.xkliveplay.activity.fragment.view.AlwaysMarqueeTextView
+            android:id="@+id/tv_backplaying_programe"
+            android:layout_width="@dimen/px_125"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="@dimen/px_40"
+            android:ellipsize="marquee"
+            android:focusable="false"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="怪兽大学中怪物史莱克"
+            android:textColor="@color/white"
+            android:textSize="@dimen/timeshift_text_size"
+            android:visibility="gone" >
+        </com.xike.xkliveplay.activity.fragment.view.AlwaysMarqueeTextView>
+
+            <ImageView
+        android:id="@+id/iv_pause_play"
+        android:layout_width="@dimen/px_30"
+        android:layout_height="@dimen/px_36"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/px_50"
+        android:src="@drawable/backplay_continue" />
+        
+        <TextView
+            android:layout_toRightOf="@id/iv_pause_play"
+            android:layout_marginLeft="@dimen/px_64"
+            android:layout_centerVertical="true"
+            android:id="@+id/tv_backplay_curtime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/px_34"
+            android:text="20:15"
+            android:textColor="@color/white"
+            android:textSize="@dimen/timeshift_text_size" >
+        </TextView>
+
+        <SeekBar
+            android:id="@+id/sb_process"
+            android:layout_centerVertical="true"
+            android:layout_width="@dimen/px_843"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/px_18"
+            android:layout_marginTop="@dimen/px_41"
+            android:layout_toRightOf="@id/tv_backplay_curtime"
+            android:max="120"
+            android:maxHeight="@dimen/px_14"
+            android:minHeight="@dimen/px_14"
+            android:progress="50"
+            android:progressDrawable="@drawable/progress_seekbar_style"
+            android:thumb="@drawable/vol_indicator"
+            android:thumbOffset="0dip" />
+
+        <TextView
+            android:id="@+id/tv_backplay_alltime"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/px_18"
+            android:layout_marginTop="@dimen/px_36"
+            android:layout_toRightOf="@id/sb_process"
+            android:text="01:42:46"
+            android:textColor="@color/white"
+            android:textSize="@dimen/timeshift_text_size" >
+        </TextView>
+    </RelativeLayout>
+
+</RelativeLayout>

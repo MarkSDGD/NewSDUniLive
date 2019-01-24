@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/px_432"
+    android:layout_height="@dimen/px_290"
+    android:layout_gravity="center"
+    android:background="#cc000000"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/px_12"
+        android:text="错误提示"
+        android:textColor="#80ffffff"
+        android:textSize="@dimen/sp_20" />
+
+    <TextView
+        android:id="@+id/tv_dialog_error_code"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/px_44"
+        android:text="51007"
+        android:textColor="#30bdeb"
+        android:textSize="@dimen/sp_33"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/tv_error_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:layout_gravity="center_horizontal"
+            android:lineSpacingExtra="@dimen/px_4"
+            android:text="请重启机顶盒，如问题未解决请联系客服。"
+            android:textColor="#30bdeb"
+            android:textSize="@dimen/sp_20" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/px_218" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/px_26"
+            android:src="@drawable/error_circle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="按   确认   键退出"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/sp_20" />
+    </RelativeLayout>
+
+</RelativeLayout>
