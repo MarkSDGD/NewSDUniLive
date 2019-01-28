@@ -23,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.gd.LogUtils;
 
 
 /**
@@ -43,6 +44,8 @@ public class ZZProductItemView extends RelativeLayout
 	private TextView tvPriceRight;
 	private TextView tvDeleteText;
 	private TextView tvDate;
+
+	private String errorCode = "";
 	
 	
 	private TextView tvProductInfo;
@@ -101,7 +104,13 @@ public class ZZProductItemView extends RelativeLayout
 				params.gravity = Gravity.CENTER;
 				win.setAttributes(params);
 				dialog.show();
-				dialog.refreshData(product);
+
+				if ("51041-507".equals(errorCode) || "51041-506".equals(errorCode)) {
+					LogUtils.i("xumin", "playAuth: " + "点击了errorCode: " + errorCode);
+					dialog.refreshData(product, errorCode);
+				}else {//else这种情况，理论上不会发生的
+					dialog.refreshData(product);
+				}
 			}
 		});
 		
@@ -113,19 +122,86 @@ public class ZZProductItemView extends RelativeLayout
 		
 	}
 
+	public String getErrorCode() {
+		return errorCode;
+	}
+
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
+
 	public void refreshData(ZZProduct product)
 	{
 		this.product = product;
-		tvProductName.setText(product.getName());
-		tvPriceLeft.setText(product.getPriceLeft());
-		tvPriceRight.setText(product.getPriceRight());
-		priceView.setPrice(product.getPrice());
-		tvDeleteText.setText(product.getOriPrice());
-		tvDate.setText(product.getDate());
-		tvProductInfo.setText(product.getInfo());
+		String temp = product.getName();//定义这个和下面的if都是容错的
+		if (!"".equals(temp) && null != temp){
+			tvProductName.setText(temp);
+		}
+
+		temp = product.getPriceLeft();
+		if (!"".equals(temp) && null != temp) {
+			tvPriceLeft.setText(temp);
+		}
+		temp = product.getPriceRight();
+		if (!"".equals(temp) && null != temp) {
+			tvPriceRight.setText(temp);
+		}
+		temp = product.getPrice();
+		if (!"".equals(temp) && null != temp){
+			priceView.setPrice(temp);
+		}
+		temp = product.getOriPrice();
+		if (!"".equals(temp) && null != temp){
+			tvDeleteText.setText(temp);
+		}
+		temp = product.getDate();
+		if (!"".equals(temp) && null != temp){
+			tvDate.setText(temp);
+		}
+		temp = product.getInfo();
+		if (!"".equals(temp) && null != temp){
+			tvProductInfo.setText(temp);
+		}
 		if (btn!=null) btn.setTag(product);
 	}
-	
+	public void refreshData(ZZProduct product, String errorCode)
+	{
+		this.product = product;
+		String temp = product.getName();//定义这个和下面的if都是容错的
+		if (!"".equals(temp) && null != temp){
+			tvProductName.setText(temp);
+		}
+
+		temp = product.getPriceLeft();
+		if (!"".equals(temp) && null != temp) {
+			tvPriceLeft.setText(temp);
+		}
+		temp = product.getPriceRight();
+		if (!"".equals(temp) && null != temp) {
+			tvPriceRight.setText(temp);
+		}
+		temp = product.getPrice();
+		if (!"".equals(temp) && null != temp){
+			priceView.setPrice(temp);
+		}
+		temp = product.getOriPrice();
+		if (!"".equals(temp) && null != temp){
+			tvDeleteText.setText(temp);
+		}
+		temp = product.getDate();
+		if (!"".equals(temp) && null != temp){
+			tvDate.setText(temp);
+		}
+		temp = product.getInfo();
+		if (!"".equals(temp) && null != temp){
+			tvProductInfo.setText(temp);
+		}
+		if (btn!=null) btn.setTag(product);
+
+		this.errorCode = errorCode;
+	}
+
 	public void setFocusChangeListener(OnFocusChangeListener listener)
 	{
 		if (btn!=null) btn.setOnFocusChangeListener(listener);

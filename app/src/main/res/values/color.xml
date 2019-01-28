@@ -5,7 +5,7 @@
     <drawable name="black">#000000</drawable>
     <drawable name="blue">#0000FF</drawable>
     <drawable name="trans">#00000000</drawable>
-    <color name="white_50">#80ffffff</color>
+
     <color name="background">#083008</color>
     <color name="transparent_background">#00000000</color>
     <color name="white">#ffffff</color>
@@ -19,11 +19,13 @@
     <color name="keyboard_num_bg">#019966</color>
     <color name="backplay_spliter">#59595950</color>
     <color name="backplay_future_text">#ffff99</color>
-    
+
     <color name="white_30">#1Effffff</color>
+    <color name="white_50">#80ffffff</color>
+    <color name="white_80">#a0ffffff</color>
     <color name="black_80">#cc000000</color>
     <color name="black_50">#80000000</color>
     <color name="seekbar_background_color">#5a605b</color>
     <color name="seekbar_progress_color">#30bdeb</color>
-
+    <color name="resee_nofocus">#6e6e6e</color>
 </resources>

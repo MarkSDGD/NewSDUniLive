@@ -30,7 +30,7 @@ public class Var {
 	
 	public static final String Category_Save = "save";
 	public static final String Category_Recent = "recent";
-	
+	public  static final int vipTryPlayLength = 5;//试看定为90s
 	public static final int INIT_OK = 1;
 	public static final int INIT_FAILED = 2;
 	

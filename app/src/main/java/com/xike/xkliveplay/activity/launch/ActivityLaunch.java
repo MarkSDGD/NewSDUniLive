@@ -77,7 +77,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
     private int INVOKE_YD_AUTH = 3;
     private int MSG_INVOKE_AUTH_ERROR = 4;
 
-    private String[] idMacArray;
+    private String[] idMacArray = {"",""};
 
     private ActivateTerminal activate_req = null;
 
@@ -151,8 +151,8 @@ public class ActivityLaunch extends ActivityLaunchBase {
 
     private void settings() {
         Var.isStatic = true;
-        Var.isZZEnabled = false;
-        GDHttpTools.getInstance().setGDOrderEnable(false);
+        Var.isZZEnabled = true;
+        GDHttpTools.getInstance().setGDOrderEnable(true);
         //		Toast.makeText(getApplicationContext(),"修改了SDK的域名为测试域名："+"http://223.99.253.49:8080",Toast.LENGTH_LONG).show();
         //GDHttpTools.getInstance().setLiveUrl("http://223.99.253.49:8080");  //测试地址
         VarParam.url = VarParam.CM_URL;

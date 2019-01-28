@@ -40,7 +40,7 @@ public class TypefaceTools
 	{
 		if (yuantiFont == null) 
 		{
-			yuantiFont = Typeface.createFromAsset(context.getAssets(), "fonts/yuanti.ttf");
+			yuantiFont = Typeface.createFromAsset(context.getAssets(), "fonts/yuanti.TTF");
 		}
 		return yuantiFont;
 	}

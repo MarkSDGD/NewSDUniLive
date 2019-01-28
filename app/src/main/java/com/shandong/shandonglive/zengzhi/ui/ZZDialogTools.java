@@ -13,11 +13,19 @@ public class ZZDialogTools
     private static ZZDialogTools dialogTools = null;
     private ZZOrderDialog zzOrderDialog;
 
+    public ZZOrderDialog getZzOrderDialog() {
+        return zzOrderDialog;
+    }
+
     public static ZZDialogTools getInstance(){
         if (dialogTools == null){
             dialogTools = new ZZDialogTools();
         }
         return dialogTools;
+    }
+    public static void deInstance()
+    {
+        dialogTools=null;
     }
 
     public void showOrderDialog(String channelName,String userId,String channelId,String categoryId,Activity activity)
@@ -36,5 +44,24 @@ public class ZZDialogTools
         zzOrderDialog.refreshText(channelName,userId);
         zzOrderDialog.setCategoryId(categoryId);
         zzOrderDialog.setChannelId(channelId);
+    }
+
+    public void showOrderDialog(String channelName,String userId,String channelId,String categoryId,Activity activity, String errorCode)
+    {
+        if (zzOrderDialog!=null && zzOrderDialog.isShowing()) zzOrderDialog.dismiss();
+        if (zzOrderDialog==null)
+        {
+            zzOrderDialog = new ZZOrderDialog(activity, R.style.MyDialog);
+            Window win = zzOrderDialog.getWindow();
+            win.setBackgroundDrawableResource(R.color.transparent_background);
+            WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.gravity = Gravity.CENTER;
+            win.setAttributes(params);
+        }
+        zzOrderDialog.show();
+        zzOrderDialog.refreshText(channelName,userId);
+        zzOrderDialog.setCategoryId(categoryId);
+        zzOrderDialog.setChannelId(channelId);
+        zzOrderDialog.setErrorCode(errorCode);
     }
 }

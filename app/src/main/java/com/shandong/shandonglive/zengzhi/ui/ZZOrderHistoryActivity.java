@@ -14,6 +14,7 @@ package com.shandong.shandonglive.zengzhi.ui;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -26,6 +27,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.framework.entity.gd.CMHOrderListData;
+import com.xike.xkliveplay.framework.entity.gd.CMHOrderListResult;
+import com.xike.xkliveplay.framework.http.IUpdateData;
+import com.xike.xkliveplay.gd.GDHttpTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +52,8 @@ public class ZZOrderHistoryActivity extends FragmentActivity
 	private TextView tvNoHistory;
 	
 	private LinearLayout llHead;
+	List<ZZOrderHistory> list = new ArrayList<ZZOrderHistory>();//用来记录获取到的订购记录
+	ZZOrderListViewAdapter adapter;//用于更新list
 	
 	@Override
 	protected void onCreate(Bundle arg0) 
@@ -55,6 +62,7 @@ public class ZZOrderHistoryActivity extends FragmentActivity
 		setContentView(R.layout.zz_order_history_activity_main);
 		
 		initView();
+		adapter = new ZZOrderListViewAdapter(this);
 	}
 	
 	private void initView() 
@@ -68,88 +76,56 @@ public class ZZOrderHistoryActivity extends FragmentActivity
 		tvNoHistory = (TextView) findViewById(R.id.zz_tv_order_nohistory);
 		llHead = (LinearLayout) findViewById(R.id.zz_ll_order_tablehead);
 		tvNoHistory.setTypeface(TypefaceTools.getYuanTiFont(this));
-		
-		List<ZZOrderHistory> list = new ArrayList<ZZOrderHistory>();
-		
-		ZZOrderHistory history01 = new ZZOrderHistory();
-		history01.setName("高尔夫网球频道 10元/月");
-		history01.setType("单频道包月");
-		history01.setPrice("10元");
-		history01.setId("TVDY20YF6DS2B");
-		history01.setStartDate("2018-06-04 15:30");
-		history01.setEndDate("2018-07-03 15:30");
-		
-		ZZOrderHistory history02 = new ZZOrderHistory();
-		history02.setName("海看直播全频道包 50元/月");
-		history02.setType("VIP包月");
-		history02.setPrice("50元");
-		history02.setId("TVDY31O");
-		history02.setStartDate("2018-06-04 15:30");
-		history02.setEndDate("2018-07-03 15:30");
-		
-		ZZOrderHistory history03 = new ZZOrderHistory();
-		history03.setName("海看直播全频道包 360元/年");
-		history03.setType("VIP包年");
-		history03.setPrice("360元");
-		history03.setId("TVDY9SHJ95FGS");
-		history03.setStartDate("2018-06-04 15:30");
-		history03.setEndDate("2019-06-04 15:30");
-		
-		ZZOrderHistory history04 = new ZZOrderHistory();
-		history04.setName("湖南金鹰卡通 60元/月");
-		history04.setType("单频道包月");
-		history04.setPrice("60元");
-		history04.setId("TVDY2G9");
-		history04.setStartDate("2018-06-04 15:30");
-		history04.setEndDate("2018-07-03 15:30");
-		
-		ZZOrderHistory history05 = new ZZOrderHistory();
-		history05.setName("四海钓鱼 380/年");
-		history05.setType("单频道包年");
-		history05.setPrice("380元");
-		history05.setId("TVD98SDFA9F");
-		history05.setStartDate("2018-06-04 15:30");
-		history05.setEndDate("2018-07-03 15:30");
-		
-		
-		list.add(history01);
-		list.add(history02);
-		list.add(history03);
-		list.add(history04);
-		list.add(history05);
-		list.add(history01);
-		list.add(history02);
-		list.add(history03);
-		list.add(history04);
-		list.add(history05);
-		
+//		GDHttpTools.getInstance().queryOrderList(getApplicationContext(), GDHttpTools.getInstance().getTag(), "1", GDHttpTools.getInstance().getUserId(), GDHttpTools.getInstance().getUsertokenAIDL(), iUpdateData);//请求订购的包月产品列表
 		lv.setEnabled(false);
 		lv.setSmoothScrollbarEnabled(true);
 		lv.setOnScrollListener(listener);
-		
-		
-		ZZOrderListViewAdapter adapter = new ZZOrderListViewAdapter(this);
+		hd.removeCallbacks(queryOrderHistoryThread);
+		hd.post(queryOrderHistoryThread);
+//		ZZOrderListViewAdapter adapter = new ZZOrderListViewAdapter(this);
+//		lv.setAdapter(adapter);
+//		adapter.refreshData(list);
+//
+//		if (list.size() <= 5 && list.size()>0)
+//		{
+//			ivDown.setVisibility(View.INVISIBLE);
+//			ivUP.setVisibility(View.INVISIBLE);
+//		}else if(list.size() > 5){
+//			ivDown.setVisibility(View.VISIBLE);
+//			ivUP.setVisibility(View.INVISIBLE);
+//		}else if (list.size() == 0)
+//		{
+//			lv.setVisibility(View.GONE);
+//			llHead.setVisibility(View.GONE);
+//			ivDown.setVisibility(View.GONE);
+//			ivUP.setVisibility(View.GONE);
+//			tvNoHistory.setVisibility(View.VISIBLE);
+//
+//		}
+	}
+	private void refreshList(){
+		if (list.isEmpty()) {
+			Log.i("ZZOrderHistoryActivity", "list.isEmpty() in refreshList");
+			return;
+		}
 		lv.setAdapter(adapter);
 		adapter.refreshData(list);
-		
-		if (list.size() <= 5 && list.size()>0) 
+		if (list.size() <= 5 && list.size()>0)
 		{
 			ivDown.setVisibility(View.INVISIBLE);
 			ivUP.setVisibility(View.INVISIBLE);
 		}else if(list.size() > 5){
 			ivDown.setVisibility(View.VISIBLE);
 			ivUP.setVisibility(View.INVISIBLE);
-		}else if (list.size() == 0) 
+		}else if (list.size() == 0)
 		{
 			lv.setVisibility(View.GONE);
 			llHead.setVisibility(View.GONE);
 			ivDown.setVisibility(View.GONE);
 			ivUP.setVisibility(View.GONE);
 			tvNoHistory.setVisibility(View.VISIBLE);
-			
 		}
 	}
-	
 	private OnScrollListener listener = new OnScrollListener() {
 		
 		@Override
@@ -236,5 +212,72 @@ public class ZZOrderHistoryActivity extends FragmentActivity
 		handler.removeCallbacks(runnable);
 		handler.postDelayed(runnable, 500);
 	}
+
+	/**********************************handler用来从网络请求历史记录，然后更新UI*****************************************/
+	@SuppressLint("HandlerLeak")
+	private Handler hd = new Handler(){
+		@Override
+		public void handleMessage(Message msg)
+		{
+			switch (msg.what) {
+			case 1:
+				refreshList();//刷新页面
+			break;
+
+			default:
+			break;
+			}
+		}
+	};
+	private Runnable queryOrderHistoryThread = new Runnable() {
+		@Override
+		public void run() {
+			list.clear();
+			GDHttpTools.getInstance().queryOrderList(getApplicationContext(), GDHttpTools.getInstance().getTag(), "0", GDHttpTools.getInstance().getUserId(), GDHttpTools.getInstance().getUsertokenAIDL(), new IUpdateData() {
+				@Override
+				public void updateData(String method, String uniId, Object object, boolean isSuccess) {
+					CMHOrderListData cmhOrderListRes = (CMHOrderListData) object;
+					if (isSuccess) {
+						List<CMHOrderListResult.CMHOrderListBean> listBeanList = cmhOrderListRes.getData();
+						for (CMHOrderListResult.CMHOrderListBean cmhOrderListBean:listBeanList) {
+							ZZOrderHistory historyBean = new ZZOrderHistory();
+							historyBean.setName(cmhOrderListBean.getProductName());
+							historyBean.setType("包月");
+							historyBean.setPrice(cmhOrderListBean.getFee());
+							historyBean.setId(cmhOrderListBean.getProductID());
+							historyBean.setStartDate(cmhOrderListBean.getStartTime());
+							historyBean.setEndDate(cmhOrderListBean.getEndTime());
+							list.add(historyBean);
+						}
+						hd.sendEmptyMessage(1);
+					}else {
+//						GDDialogTools.creater().showDialog(getApplicationContext(),cmhOrderListRes.getCode(),cmhOrderListRes.getDescription(),GDHttpTools.getInstance().getUserId(), GetStbinfo.getLocalMacAddress());
+					}
+				}
+			});//请求订购的包月产品列表
+			GDHttpTools.getInstance().queryOrderList(getApplicationContext(), GDHttpTools.getInstance().getTag(), "1", GDHttpTools.getInstance().getUserId(), GDHttpTools.getInstance().getUsertokenAIDL(), new IUpdateData() {
+				@Override
+				public void updateData(String method, String uniId, Object object, boolean isSuccess) {
+					CMHOrderListData cmhOrderListRes = (CMHOrderListData) object;
+					if (isSuccess) {
+						List<CMHOrderListResult.CMHOrderListBean> listBeanList = cmhOrderListRes.getData();
+						for (CMHOrderListResult.CMHOrderListBean cmhOrderListBean:listBeanList) {
+							ZZOrderHistory historyBean = new ZZOrderHistory();
+							historyBean.setName(cmhOrderListBean.getProductName());
+							historyBean.setType("按次");
+							historyBean.setPrice(cmhOrderListBean.getFee());
+							historyBean.setId(cmhOrderListBean.getProductID());
+							historyBean.setStartDate(cmhOrderListBean.getStartTime());
+							historyBean.setEndDate(cmhOrderListBean.getEndTime());
+							list.add(historyBean);
+						}
+						hd.sendEmptyMessage(1);
+					}else {
+//						GDDialogTools.creater().showDialog(getApplicationContext(),cmhOrderListRes.getCode(),cmhOrderListRes.getDescription(),GDHttpTools.getInstance().getUserId(), GetStbinfo.getLocalMacAddress());
+					}
+				}
+			});//请求订购的单词产品列表
+		}
+	};
 	
 }

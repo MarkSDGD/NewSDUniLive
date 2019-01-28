@@ -27,6 +27,7 @@ import com.xike.xkliveplay.framework.entity.GetContentList;
 import com.xike.xkliveplay.framework.entity.GetContentListRes;
 import com.xike.xkliveplay.framework.entity.GetScheduleList;
 import com.xike.xkliveplay.framework.entity.Schedule;
+import com.xike.xkliveplay.framework.entity.gd.CMHOrderListData;
 import com.xike.xkliveplay.framework.entity.gd.GDAuth4in1Res;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthActivateTerminalRes;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthAidlRes;
@@ -35,6 +36,8 @@ import com.xike.xkliveplay.framework.entity.gd.GDAuthAuthenticationRes;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthGetAccountRes;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthGetStaticContent;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthLiveCategory;
+import com.xike.xkliveplay.framework.entity.gd.GDCMSMSCode;
+import com.xike.xkliveplay.framework.entity.gd.GDCancelCMHOrderRes;
 import com.xike.xkliveplay.framework.entity.gd.GDOrderGetProductListInfoRes;
 import com.xike.xkliveplay.framework.entity.gd.GDOrderPlayAuthCMHWRes;
 import com.xike.xkliveplay.framework.entity.gd.GDOrderbestoPlayAuthRes;
@@ -106,7 +109,13 @@ public class GDHttpTools
 	public static final String METHOD_GETLIVESCHEDULEALLLIST = "METHOD_GETLIVESCHEDULEALLLIST";
 	public static final String METHOD_GETLIVESCHEDULELIST = "METHOD_GETLIVESCHEDULELIST";
 	public static final String METHOD_GETAIDLDATA = "METHOD_GETAIDLDATA";
+	public static final String METHOD_ORDER_QUERYORDERLIST = "METHOD_ORDER_QUERYORDERLIST";//查询所有的订购记录
 
+	public static final String METHOD_ORDER_CANCELORDER = "METHOD_ORDER_CANCELORDER";//取消订单
+	public static final String METHOD_ORDER_CMSENDSMS = "METHOD_ORDER_CMSENDSMS";
+	public static final String GD_CMHORDERRES = "qrorder";//用于在订购后，华为返回成功信息之后，保存下这个订单信息来，这个是五分钟内不刷新二维码用的，所以同时这里也要保存一个时间，用来记录这个5min的开始时间
+	public static final String GD_CMHORDERSUCCES_STARTTIME = "qrordertime";//用来记录这个5min的开始时间
+	public static final String GD_SMSCODE = "smscode";
 	public static GDHttpTools getInstance(){
 		if (tools == null)
 		{
@@ -499,7 +508,7 @@ public class GDHttpTools
 //	private String testplayauthstr = "{\"code\":\"60000-2\",\"data\":[{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"2000\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW001\",\"name\":\"海看大片VIP包月\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"200\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW002\",\"name\":\"海看大片VIP包季\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"10\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW003\",\"name\":\"海看大片VIP包年\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"}],\"description\":\"订购\",\"endTime\":\"2018-07-14 13:52:59.423\",\"msg\":\"order\",\"startTime\":\"2018-07-14 13:52:58.822\",\"state\":\"success\"}";
 //	private String testplayauthstr = "{\"code\":\"60000-2\",\"data\":[{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"2000\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW001\",\"name\":\"海看大片VIP包月\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"200\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW002\",\"name\":\"海看大片VIP包季\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"10\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW003\",\"name\":\"海看大片VIP包年\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"}],\"description\":\"订购\",\"endTime\":\"2018-07-14 13:52:59.423\",\"msg\":\"order\",\"startTime\":\"2018-07-14 13:52:58.822\",\"state\":\"success\"}";
 //	private String testplayauthstr1 = "{\"code\":\"60000-1\",\"data\":[],\"description\":\"播放\",\"endTime\":\"2018-08-09 10:22:38.083\",\"msg\":\"play\",\"startTime\":\"2018-08-09 10:22:37.608\",\"state\":\"success\"}";
-	public void playAuth(final Context context, final String type, final String tag, final String programID, final String categoryID, String superCid, String userId, String userToken, String epgUrlAidl, String usertokenAIDL, final IUpdateData iUpdateData)
+	/*public void playAuth(final Context context, final String type, final String tag, final String programID, final String categoryID, String superCid, String userId, String userToken, String epgUrlAidl, String usertokenAIDL, final IUpdateData iUpdateData)
 	{
 		if (isGDOrderEnable)
 		{
@@ -537,7 +546,7 @@ public class GDHttpTools
 			});
 		}
 	}
-
+*/
 	/**
 	 *
 	  * bestoPlayAuth(广电百途播放鉴权方法)
@@ -1235,6 +1244,152 @@ public class GDHttpTools
 	}
 	//wangfangxu
 
+	/**
+	 *
+	 * @param context
+	 * @param tag 电信：0 移动华为：1 移动中兴：2
+	 * @param queryType 包月产品：0 按次产品：1
+	 * @param account 用户账户
+	 * @param userTokenAIDL AIDL返回的userToken
+	 * @param iUpdateData 回调方法
+	 */
+	public void queryOrderList(final Context context, String tag, String queryType, String account, String userTokenAIDL, final IUpdateData iUpdateData) {
 
+		SDKMethods.queryOrderList(tag, queryType, account, userTokenAIDL, new SDKMethods.RequestCallback() {
+
+			@Override
+			public void onGetData(String str) {
+				showLog("queryOrderList："+str);
+				CMHOrderListData res = new Gson().fromJson(str, CMHOrderListData.class);
+				showLog("queryOrderList："+res.toString());
+				if (res.getCode().equals("51000")) {
+					iUpdateData.updateData(METHOD_ORDER_QUERYORDERLIST, "", res, true);
+				}else {
+					iUpdateData.updateData(METHOD_ORDER_QUERYORDERLIST, "", res, false);
+				}
+			}
+		});
+
+	}
+
+	/**
+	 *取消订单接口
+	 * @param context
+	 * @param tag 直播：0 点播：1
+	 * @param orderID 订单号
+	 * @param account 用户账号
+	 * @param usertokenAIDL
+	 * @param iUpdateData
+	 */
+	public void cancelCMHOrder(final Context context, String tag, String orderID, String account, String usertokenAIDL, final IUpdateData iUpdateData) {
+		showLog("广电cancelCMHOrder接口：tag："+tag);
+		showLog("广电cancelCMHOrder接口：orderID："+orderID);
+		showLog("广电cancelCMHOrder接口：account："+account);
+		showLog("广电cancelCMHOrder接口：usertokenAIDL："+usertokenAIDL);
+		SDKMethods.cancleCMhOrder(tag, orderID, account, usertokenAIDL, new SDKMethods.RequestCallback(){
+
+			@Override
+			public void onGetData(String str) {
+				showLog("广电cancelCMHOrder接口："+str);
+				GDCancelCMHOrderRes res = new Gson().fromJson(str, GDCancelCMHOrderRes.class);
+				showLog("广电cancelCMHOrder接口："+res.toString());
+				if (res.getCode().equals("51000")) {
+					iUpdateData.updateData(METHOD_ORDER_CANCELORDER, "", res, true);
+				}else {
+					iUpdateData.updateData(METHOD_ORDER_CANCELORDER, "", res,false);
+				}
+			}
+		});
+
+	}
+
+	public void sendcmSMS(String type, String tag, String userId, String usertokenAIDL, String EPGURLAIDL, String smsCode, final IUpdateData iUpdateData) {
+		showLog("广电sendcmSMS接口：type："+type);
+		showLog("广电sendcmSMS接口：tag："+tag);
+		showLog("广电sendcmSMS接口：account："+userId);
+		showLog("广电sendcmSMS接口：usertokenAIDL："+usertokenAIDL);
+		showLog("广电sendcmSMS接口：EPGURLAIDL："+EPGURLAIDL);
+		showLog("广电sendcmSMS接口：smsCode："+smsCode);
+		//temp Code[S]
+		//		userId = "18364127058";
+		//temp Code[E]
+		SDKMethods.sendcmSMS(type, tag, userId, usertokenAIDL, EPGURLAIDL, smsCode, new SDKMethods.RequestCallback(){
+			@Override
+			public void onGetData(String str) {
+				showLog("广电sendcmSMS接口："+str);
+				GDCMSMSCode res = new Gson().fromJson(str, GDCMSMSCode.class);
+				showLog("广电sendcmSMS接口："+res.toString());
+				if (res.getCode().equals("51000")) {
+					iUpdateData.updateData(METHOD_ORDER_CMSENDSMS,"", res, true);
+				}else {
+					iUpdateData.updateData(METHOD_ORDER_CMSENDSMS,"", res, false);
+				}
+			}
+		});
+	}
+
+	/**
+	 *
+	 * playAuth(播放鉴权接口)
+	 * @param type
+	 * @param tag
+	 * @param programID
+	 * @param categoryID
+	 * @param superCid
+	 * @param userId
+	 * @param userToken
+	 * @param epgUrlAidl
+	 * @param usertokenAIDL
+	 * @param iUpdateData
+	 * @return void    返回类型
+	 * @modifyHistory  createBy Mernake
+	 */
+	//	private String testplayauthstr = "{\"code\":\"60000-2\",\"data\":[{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"2000\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW001\",\"name\":\"海看大片VIP包月\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"200\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW002\",\"name\":\"海看大片VIP包季\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"10\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW003\",\"name\":\"海看大片VIP包年\",\"producttype\":1,\"serviceid\":\"smgpack0000000000000000000000281\"}],\"description\":\"订购\",\"endTime\":\"2018-07-14 13:52:59.423\",\"msg\":\"order\",\"startTime\":\"2018-07-14 13:52:58.822\",\"state\":\"success\"}";
+	//	private String testplayauthstr = "{\"code\":\"60000-2\",\"data\":[{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"2000\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW001\",\"name\":\"海看大片VIP包月\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"200\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW002\",\"name\":\"海看大片VIP包季\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"},{\"endtime\":\"20180618154638ð20991231235959\",\"point\":\"0\",\"starttime\":\"20180518154638\",\"price\":\"10\",\"authfalg\":\"1\",\"continueable\":\"1\",\"productid\":\"LW003\",\"name\":\"海看大片VIP包年\",\"producttype\":\"1\",\"serviceid\":\"smgpack0000000000000000000000281\"}],\"description\":\"订购\",\"endTime\":\"2018-07-14 13:52:59.423\",\"msg\":\"order\",\"startTime\":\"2018-07-14 13:52:58.822\",\"state\":\"success\"}";
+	//	private String testplayauthstr1 = "{\"code\":\"60000-1\",\"data\":[],\"description\":\"播放\",\"endTime\":\"2018-08-09 10:22:38.083\",\"msg\":\"play\",\"startTime\":\"2018-08-09 10:22:37.608\",\"state\":\"success\"}";
+	public void playAuth(final Context context, final String type, final String tag, final String programID, final String categoryID, String superCid, String userId, String userToken, String epgUrlAidl, String usertokenAIDL, final IUpdateData iUpdateData)
+	{
+		if (isGDOrderEnable)
+		{
+			showLog("广电playAuth接口：type："+type);
+			showLog("广电playAuth接口：tag："+tag);
+			showLog("广电playAuth接口：programID："+programID);
+			showLog("广电playAuth接口：categoryID："+categoryID);
+			showLog("广电playAuth接口：superCid："+superCid);
+			showLog("广电playAuth接口：userId："+userId);
+			showLog("广电playAuth接口：userToken："+userToken);
+			showLog("广电playAuth接口：epgUrlAidl："+epgUrlAidl);
+			showLog("广电playAuth接口：usertokenAIDL："+usertokenAIDL);
+
+			SDKMethods.playAuth(type, tag, programID, categoryID, superCid, userId, userToken, epgUrlAidl, usertokenAIDL, new SDKMethods.RequestCallback()
+			{
+				@Override
+				public void onGetData(String str)
+				{
+					showLog("广电playAuth接口："+str);
+					if (tag.equals("1"))  //移动华为平台
+					{
+						GDOrderPlayAuthCMHWRes res = new Gson().fromJson(str, GDOrderPlayAuthCMHWRes.class);
+						showLog("广电playAuth接口：res："+res.toString());
+						if (res.getCode().contains("51000"))//code含有51000只有两种情况51000-1（播放）和51000-2（订购）两种状态
+						{
+							playAuthList.put(programID,res);
+							if ("51000-1".equals(res.getCode())) {//只在51000-1能够播放的情况下，才保存到缓存
+								ZZFileTools.getInstance().saveZZData(context,programID,res);
+							}
+							if (iUpdateData!=null)iUpdateData.updateData(METHOD_ORDER_PLAYAUTH, "", res, true);
+						}else{
+							//51041-506和51041-507的情况下，都是要有产品列表返回的，因为这个时候，需要再次弹出订购页面。需要拿着这个产品ID，继续去订购
+							if (("51041-506".equals(res.getCode()) || "51041-507".equals(res.getCode())) && res.getData() != null) {
+								LogUtils.i("xumin", "res.getCode(): " + res.getCode() + "  res.getData(): " + res.getData().toString());
+								playAuthList.put(programID,res);
+							}
+							if (iUpdateData!=null)iUpdateData.updateData(METHOD_ORDER_PLAYAUTH, "", res, false);
+						}
+					}
+				}
+			});
+		}
+	}
 
 }

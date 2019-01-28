@@ -197,4 +197,14 @@ public class FragmentBase extends Fragment
 	{
 		
 	}
+
+	/**
+	 * 直播专用的一个接口
+	 * 在VIP频道试看的时候，如果断了网，那么就停掉试看回看时间计数器，
+	 * 在OrderDialog已经出现的情况下，dismiss这个Dialog
+	 * 这是为了防止发生不可描述的错误
+	 */
+	public void stopCountDownOrdismissOrderDialog(){
+
+	}
 }

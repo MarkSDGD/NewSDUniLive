@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<item android:state_pressed="true" >-->
+        <!--<shape>-->
+            <!--&lt;!&ndash; 填充&ndash;&gt;-->
+            <!--<solid android:color="@color/transparent_background"/>-->
+            <!--&lt;!&ndash; 描边 &ndash;&gt;-->
+            <!--<stroke android:width="3dp"-->
+                <!--android:color="#1111ff"/>-->
+            <!--&lt;!&ndash; 圆角 &ndash;&gt;-->
+            <!--<corners android:radius="10dp" />-->
+        <!--</shape>-->
+    <!--</item>-->
+    <!--<item android:state_focused="true" >-->
+        <!--<shape>-->
+            <!--&lt;!&ndash; 填充&ndash;&gt;-->
+            <!--<solid android:color="@color/transparent_background"/>-->
+            <!--&lt;!&ndash; 描边 &ndash;&gt;-->
+            <!--<stroke android:width="3dp"-->
+                <!--android:color="#0099FF"/>-->
+            <!--&lt;!&ndash; 圆角 &ndash;&gt;-->
+            <!--<corners android:radius="10dp" />-->
+        <!--</shape>-->
+    <!--</item>-->
+    <item>
+        <shape>
+            <!--&lt;!&ndash; 填充&ndash;&gt;-->
+            <!--<solid android:color="@color/transparent_background"/>-->
+            <!--&lt;!&ndash; 描边 &ndash;&gt;-->
+            <stroke android:width="4dp"
+                android:color="#0000FF"/>
+            <padding
+                android:top="2dp"
+                android:bottom="2dp"
+                android:left="2dp"
+                android:right="2dp"/>
+            <!-- 圆角 -->
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</selector>

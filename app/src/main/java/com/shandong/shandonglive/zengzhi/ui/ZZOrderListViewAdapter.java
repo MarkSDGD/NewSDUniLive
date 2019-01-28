@@ -33,18 +33,18 @@ import java.util.List;
 public class ZZOrderListViewAdapter extends BaseAdapter
 {
 	private List<ZZOrderHistory> mList = new ArrayList<ZZOrderHistory>();
-
+	
 	private Context context;
 	private LayoutInflater mInflater = null;
-
-
+	
+	
 
 	public ZZOrderListViewAdapter(Context context) {
 		super();
 		this.context = context;
 		mInflater = LayoutInflater.from(context);
 	}
-
+	
 	public void refreshData(List<ZZOrderHistory> list)
 	{
 		this.mList = list;
@@ -52,15 +52,15 @@ public class ZZOrderListViewAdapter extends BaseAdapter
 	}
 
 	@Override
-	public int getCount()
+	public int getCount() 
 	{
 		return mList.size();
 	}
 
 	@Override
-	public Object getItem(int position)
+	public Object getItem(int position) 
 	{
-		if (position>=mList.size())
+		if (position>=mList.size()) 
 		{
 			return new ZZOrderHistory();
 		}
@@ -68,19 +68,19 @@ public class ZZOrderListViewAdapter extends BaseAdapter
 	}
 
 	@Override
-	public long getItemId(int position)
+	public long getItemId(int position) 
 	{
 		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
+	public View getView(int position, View convertView, ViewGroup parent) 
 	{
-		if (convertView == null)
+		if (convertView == null) 
 		{
 			convertView = mInflater.inflate(R.layout.zz_order_history_item_main, null);
 		}
-
+		
 		ZZOrderHistory orderHistory = (ZZOrderHistory) getItem(position);
 		TextView tvName = (TextView) convertView.findViewById(R.id.zz_tv_order_item_name);
 		TextView tvType = (TextView) convertView.findViewById(R.id.zz_tv_order_item_type);

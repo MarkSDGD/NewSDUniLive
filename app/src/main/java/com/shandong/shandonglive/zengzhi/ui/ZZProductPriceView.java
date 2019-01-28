@@ -31,10 +31,10 @@ import java.util.Map;
 public class ZZProductPriceView extends LinearLayout
 {
 
-	private int[] ids = {R.drawable.zz_0, R.drawable.zz_1,
-			R.drawable.zz_2, R.drawable.zz_3, R.drawable.zz_4,
-			R.drawable.zz_5, R.drawable.zz_6, R.drawable.zz_7,
-			R.drawable.zz_8, R.drawable.zz_9, R.drawable.zz_dot};
+	private int[] ids = {R.drawable.zz_0,R.drawable.zz_1,
+			R.drawable.zz_2,R.drawable.zz_3,R.drawable.zz_4,
+			R.drawable.zz_5,R.drawable.zz_6,R.drawable.zz_7,
+			R.drawable.zz_8,R.drawable.zz_9,R.drawable.zz_dot};
 	
 	private Map<String, Integer> maps = null;
 	
@@ -76,7 +76,9 @@ public class ZZProductPriceView extends LinearLayout
 		if (price==null||price.length()==0) {
 			return;
 		}
-
+		float p = Float.parseFloat(price);
+		p = p / 100;
+		price = p+"";
 		for (int i = 0; i < price.length(); i++) 
 		{
 //			System.out.println("char = " + price.charAt(i));

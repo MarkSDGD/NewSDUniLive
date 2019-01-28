@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.xike.xkliveplay.R;
@@ -36,6 +37,10 @@ public class ZZOrderDialog extends Dialog
 
 	private String channelId;
 	private String categoryId;
+	private String errorCode = "";
+
+	private Button zzOrderDialogBack;;
+	private Button zzOrderDialogOrder;
 	
 	public ZZOrderDialog(Context context, boolean cancelable, OnCancelListener cancelListener) {
 		super(context, cancelable, cancelListener);
@@ -64,14 +69,17 @@ public class ZZOrderDialog extends Dialog
 		channelName = (TextView) findViewById(R.id.zz_tv_order_channelname);
 		TextView text1 = (TextView) findViewById(R.id.zz_tv_order_text1);
 		TextView text2 = (TextView) findViewById(R.id.zz_tv_order_text2);
-		
+
 		tvHint.setTypeface(TypefaceTools.getYuanTiFont(getContext()));
 		tvAccount.setTypeface(TypefaceTools.getYuanTiFont(getContext()));
 		channelName.setTypeface(TypefaceTools.getYuanTiFont(getContext()));
 		text1.setTypeface(TypefaceTools.getYuanTiFont(getContext()));
 		text2.setTypeface(TypefaceTools.getYuanTiFont(getContext()));
-		
-		findViewById(R.id.zz_order_dialog_btn_back).setOnClickListener(new View.OnClickListener()
+		zzOrderDialogBack = (Button) findViewById(R.id.zz_order_dialog_btn_back);
+		zzOrderDialogOrder = (Button) findViewById(R.id.zz_order_dialog_btn_order);
+		zzOrderDialogOrder.requestFocus();
+
+		zzOrderDialogBack.setOnClickListener(new View.OnClickListener()
 		{
 
 			@Override
@@ -81,7 +89,7 @@ public class ZZOrderDialog extends Dialog
 			}
 		});
 
-		findViewById(R.id.zz_order_dialog_btn_order).setOnClickListener(new View.OnClickListener()
+		zzOrderDialogOrder.setOnClickListener(new View.OnClickListener()
 		{
 			
 			@Override
@@ -90,6 +98,7 @@ public class ZZOrderDialog extends Dialog
 				Intent intent = new Intent(getContext(),ZZChooseProductActivity.class);
 				intent.putExtra("channelid",channelId);
 				intent.putExtra("categoryid",categoryId);
+				intent.putExtra("errorcode", errorCode);
 				getContext().startActivity(intent);
 				dismiss();
 			}
@@ -117,4 +126,12 @@ public class ZZOrderDialog extends Dialog
 	public void setCategoryId(String categoryId) {
 		this.categoryId = categoryId;
 	}
+
+	public String getErrorCode() {
+		return errorCode;
+	}
+	public void setErrorCode(String errorCode) {
+		this.errorCode = errorCode;
+	}
+
 }

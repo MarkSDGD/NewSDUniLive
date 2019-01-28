@@ -3,9 +3,10 @@ package com.shandong.shandonglive.zengzhi.ui;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.ab.util.AbSharedUtil;
 import com.google.gson.Gson;
 import com.xike.xkliveplay.framework.entity.gd.GDOrderPlayAuthCMHWRes;
+import com.xike.xkliveplay.framework.tools.AbSharedUtil;
+import com.xike.xkliveplay.gd.LogUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +26,20 @@ public class ZZFileTools
     private static final String DIRECTORY_NAME = "/ZZ";
     private static final String SUFFIX  = "zz";
 
+    private String qrcodepath = "";
 
+
+    public String getQRCodePath(Context context)
+    {
+        File dir = new File(context.getCacheDir() + DIRECTORY_NAME);
+        //有些盒子不能创建ZZ文件夹，所以这里判断一下，不存在的话，就创建这个ZZ
+        if (!dir.exists() || !dir.isDirectory()){
+            dir.mkdirs();
+        }
+        if (qrcodepath.equals(""))qrcodepath = context.getCacheDir() + DIRECTORY_NAME + "/qrcode.jpg";
+        System.out.println("目录是：" + qrcodepath);
+        return qrcodepath;
+    }
     public static ZZFileTools getInstance()
     {
         if (instance == null) instance = new ZZFileTools();
@@ -63,6 +77,23 @@ public class ZZFileTools
         String str = new Gson().toJson(res);
         System.out.println("res="+str);
         savePackageFile(context,fileName,str);
+        setSavedZZTime(context, contentId);
+
+    }
+    public void setSavedZZTime(Context context, String contentId){
+        String key = "zzsavetime" + contentId;
+        Long savedTime = System.currentTimeMillis()/1000;
+        AbSharedUtil.putLong(context, key, savedTime);
+    }
+
+    public long  getSavedZZTime(Context context, String contentId) {
+        String key = "zzsavetime" + contentId;
+        return  AbSharedUtil.getLong(context, key);
+    }
+
+    public void clearSavedZZTime(Context context, String contentId) {
+        String key = "zzsavetime" + contentId;
+        AbSharedUtil.removeLong(context,key);
 
     }
 
@@ -103,6 +134,7 @@ public class ZZFileTools
             byte[] buffer = new byte[length];
             fis.read(buffer);
             String str = new String(buffer);
+            LogUtils.i("xumin", "queryChannelPlayAuth: " + str);
             System.out.println(str);
             GDOrderPlayAuthCMHWRes res = new Gson().fromJson(str, GDOrderPlayAuthCMHWRes.class);
             return res;
@@ -140,6 +172,25 @@ public class ZZFileTools
         if (file.isFile()){
             file.delete();
         }
+        clearSavedZZTime(context, channelId);
+    }
+
+    public boolean isTimeToClearCache(Context context, String channelId)
+    {
+        LogUtils.i("xumin", "isTimeToClearCache channelId: " + channelId);
+        long zzlasttime = getSavedZZTime(context, channelId);
+        LogUtils.i("xumin", "isTimeToClearCache zzlasttime: " + zzlasttime);
+        if (zzlasttime == 0) return false; //如果取出的时间点是0，说明从没存过或者人工置0了，这种情况下，不清除缓存
+        long nowtime = System.currentTimeMillis() / 1000;
+        LogUtils.i("xumin", "isTimeToClearCache nowtime: " + nowtime);
+        LogUtils.i("xumin", "isTimeToClearCache getTIMEOUT_SECONDS: " + getTIMEOUT_SECONDS(context));
+        if (nowtime-zzlasttime > getTIMEOUT_SECONDS(context))
+        {
+            Toast.makeText(context,"删除缓存",Toast.LENGTH_LONG).show();
+            clearZZCache(context, channelId);
+            return true;
+        }
+        return false;
     }
 
 
