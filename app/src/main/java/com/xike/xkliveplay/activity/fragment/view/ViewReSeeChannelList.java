@@ -1,14 +1,5 @@
 package com.xike.xkliveplay.activity.fragment.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.xike.xkliveplay.R;
-import com.xike.xkliveplay.framework.entity.ContentChannel;
-import com.xike.xkliveplay.framework.httpclient.VarParam;
-import com.xike.xkliveplay.framework.tools.LogUtil;
-import com.xike.xkliveplay.framework.tools.Method;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,6 +10,16 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.framework.entity.ContentChannel;
+import com.xike.xkliveplay.framework.httpclient.VarParam;
+import com.xike.xkliveplay.framework.tools.LogUtil;
+import com.xike.xkliveplay.framework.tools.Method;
+import com.xike.xkliveplay.framework.varparams.Var;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressLint("DrawAllocation")
 public class ViewReSeeChannelList extends View {
@@ -50,7 +51,8 @@ public class ViewReSeeChannelList extends View {
 	private boolean isloop = true;
 	
 	private boolean isFocus = true;
-	
+	private Bitmap bitmapNoOrder=null;
+
 	public ViewReSeeChannelList(Context context,int type)
 	{
 		super(context);
@@ -85,6 +87,8 @@ public class ViewReSeeChannelList extends View {
 			bitmapFocus = BitmapFactory.decodeResource(context.getResources(), R.drawable.backplay_channel_focus);
 			bitmapNoFocus = BitmapFactory.decodeResource(context.getResources(), R.drawable.backplay_channel_unfocus);
 		}
+		bitmapNoOrder =  BitmapFactory.decodeResource(context.getResources(), R.drawable.zz_channel_notbuy);
+
 	}
 
 	@Override
@@ -223,7 +227,18 @@ public class ViewReSeeChannelList extends View {
 		{
 			mPaint.getTextBounds(curDrawChannels.get(i).getName(),0,curDrawChannels.get(i).getName().length(), rect);
 			canvas.drawText(curDrawChannels.get(i).getName(), TEXT_LEFT, TOP + TEXT_H * i, mPaint);
+
+			if(Var.isZZEnabled&&curDrawChannels.get(i).getCountry().equals("true")) //增值 VIP
+			{
+				canvas.drawBitmap(bitmapNoOrder, 308, TOP + TEXT_H * i - Method.getScaleX(20)-20, mPaint);
+			}
+
 		}
+
+
+
+
+
 	}
 	
 	/**

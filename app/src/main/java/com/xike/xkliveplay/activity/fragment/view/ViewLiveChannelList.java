@@ -1,15 +1,5 @@
 package com.xike.xkliveplay.activity.fragment.view;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.xike.xkliveplay.R;
-import com.xike.xkliveplay.framework.entity.ContentChannel;
-import com.xike.xkliveplay.framework.httpclient.VarParam;
-import com.xike.xkliveplay.framework.tools.LogUtil;
-import com.xike.xkliveplay.framework.tools.Method;
-import com.xike.xkliveplay.framework.varparams.Var;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,6 +10,16 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.framework.entity.ContentChannel;
+import com.xike.xkliveplay.framework.httpclient.VarParam;
+import com.xike.xkliveplay.framework.tools.LogUtil;
+import com.xike.xkliveplay.framework.tools.Method;
+import com.xike.xkliveplay.framework.varparams.Var;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressLint("DrawAllocation")
 public class ViewLiveChannelList extends View {
@@ -299,12 +299,16 @@ public class ViewLiveChannelList extends View {
 				continue;
 			}
 			
-			if(curDrawChannels.get(i).getDescription().equals("1"))
+			/*if(curDrawChannels.get(i).getDescription().equals("1"))
 			{
 				canvas.drawBitmap(bitmapNoOrder, SAVE_ICON_LEFT+6, TOP + TEXT_H * i - Method.getScaleX(20)-35, mPaint);
 			}else if (curDrawChannels.get(i).getDescription().equals("2")) 
 			{
 				canvas.drawBitmap(bitmapOrder, SAVE_ICON_LEFT+6, TOP + TEXT_H * i - Method.getScaleX(20)-35, mPaint);
+			}*/
+			if(curDrawChannels.get(i).getCountry().equals("true")) //增值 VIP
+			{
+				canvas.drawBitmap(bitmapNoOrder, SAVE_ICON_LEFT+6, TOP + TEXT_H * i - Method.getScaleX(20)-35, mPaint);
 			}
 		}
 	}

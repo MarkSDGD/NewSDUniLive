@@ -3207,6 +3207,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 					if (surfaceView!= null) {
 						surfaceView.pause();//暂停播放
 					}
+					System.out.println("getActivity()=="+getActivity());
+
 					if(getActivity()!=null){
                         ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity());
                     }
