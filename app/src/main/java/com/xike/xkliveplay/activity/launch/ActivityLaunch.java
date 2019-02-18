@@ -183,9 +183,12 @@ public class ActivityLaunch extends ActivityLaunchBase {
                     }
                 });
                 boolean isLiveStarted = (Boolean) MernakeSharedTools.get(getApplicationContext(), "isLiveStarted", false);
+                Log.i("MARK","isLiveStarted=="+isLiveStarted);
                 if (isLiveStarted) { //如果为真，则说明直播已经启动过了
                     boolean jumpSign = (Boolean) MernakeSharedTools.get(getApplicationContext(), "jumpSign", false);
+                    Log.i("MARK","jumpSign=="+jumpSign);
                     if (jumpSign) { //如果为真，说明要跳过
+                        //Log.i("MARK","paramSetting2()=="+paramSetting2());
                         if (!paramSetting2()) { //如果paramSetting的返回值是真就不用处理，会直接跳转直播的
                             //如果是假的，说明缓存缺失，按照旭哥的逻辑，应该是去读取预置频道列表的
                             readDefault();
@@ -838,8 +841,8 @@ public class ActivityLaunch extends ActivityLaunchBase {
      */
     private void dealGDSuccess(String method, String uniId, Object object) {
         if (method.equals(GDHttpTools.METHOD_I6_4IN1)) {
-            showLog("4 in 1 request success!!!");
-
+           // showLog("4 in 1 request success!!!");
+            Log.i("MARK","4 in 1 request success!!!");
             GDAuth4in1Res res = (GDAuth4in1Res) object;
             stb_map.put("userId", GDHttpTools.getInstance().getUserId());
             stb_map.put("epg_domain_url", res.getData().getEpgDomain());

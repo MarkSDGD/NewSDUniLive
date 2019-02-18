@@ -295,9 +295,12 @@ public class ZZPayDialog extends Dialog
 		public void onFocusChange(View v, boolean hasFocus) 
 		{
 			if (hasFocus) {
+				/*//todo  delete
+				errorCode="";  //测试用*/
 				if (v.getId() == btnPhonePay.getId()) 
 				{
 					tvHead.setText(TEXT_HEAD_PHONEPAY);
+
 					if ("".equals(errorCode)){//这说明没有传过上次失败的产品包ID过来
 						if (getHawkAvaiableSmdCode()){//已经有有效的短信验证码，那么就显示出来
 							//初始化UI布局
@@ -335,6 +338,7 @@ public class ZZPayDialog extends Dialog
 				}else if (v.getId() == btnZhiFuBao.getId()) 
 				{
 					tvHead.setText(TEXT_HEAD_ZHIFUBAO);
+
 					if ("".equals(errorCode)) {
 						//焦点在支付宝上，如果短信的Timer不为空，这时候就取消短信这个timer
 						if (smsCountDownTimer != null) {
@@ -582,9 +586,12 @@ public class ZZPayDialog extends Dialog
 			{
 				if (orderMode == 56){
                     final GDOrdercmhOrderRes res = (GDOrdercmhOrderRes) appContext.getSaveObject(GDHttpTools.GD_CMHORDERRES + product.getProductId());
-					final Long saveTime = appContext.getLong(GDHttpTools.GD_CMHORDERSUCCES_STARTTIME + product.getProductId());
+					Log.i("ZZPayDialog", "onClick GDOrdercmhOrderRes res==: " + res);
+                    final Long saveTime = appContext.getLong(GDHttpTools.GD_CMHORDERSUCCES_STARTTIME + product.getProductId());
+					Log.i("ZZPayDialog", "onClick saveTime==: " + saveTime);
 					Long nowTime = System.currentTimeMillis();
 					Long midTime = nowTime - saveTime;
+					Log.i("ZZPayDialog", "onClick midTime==: " + midTime);
 					if (midTime > appTimeout) {//超过5min,又没有超过8min的话，就先取消一下上一个订单，然后重新获取。超过5min是app的超时，8min是华为平台的超时时间
                         if (midTime < hwTimeout) {//没超过8min
                             if (res != null) {//只有有这个订购的记录数据的情况下，才会去删除订购关系,并且在订购关系删除成功之后，再发起订购
@@ -606,6 +613,7 @@ public class ZZPayDialog extends Dialog
 					}else {
 					    if (res != null) {
                             String payurl = res.getData().getPayURL();
+							Log.i("ZZPayDialog", "onClick payurl==: " + payurl);
                             if (payurl!=null){
 								//因为这里已经在焦点移动到话费上的时候显示出来了，所以不需要再onclick的时候又显示一遍。所以下面屏蔽起来了，逻辑正确性需要进一步确认
 //                                showToast("准备生成二维码图片");
@@ -679,9 +687,12 @@ public class ZZPayDialog extends Dialog
 		@Override
 		public void updateData(String method, String uniId, Object object, boolean isSuccess)
 		{
+			Log.i("ZZPayDialog", "iUpdateData updateData uniId==" + uniId+"  isSuccess=="+isSuccess);
 			if (method.equals(GDHttpTools.METHOD_ORDER_CMHORDER))
 			{
 				final GDOrdercmhOrderRes res = (GDOrdercmhOrderRes) object;
+				Log.i("ZZPayDialog", "iUpdateData GDOrdercmhOrderRes res==" + res);
+
 				if (isSuccess){
 					if (uniId.equals("0")){
 						GDHttpTools.getInstance().cmhOrderSync(getContext(),"0", res.getStartTime(), Var.userId, GDHttpTools.getInstance().getUsertokenAIDL(), res.getData().getOrderID(), product.getProductId(), product.getChannelid(), iUpdateData);
@@ -692,24 +703,38 @@ public class ZZPayDialog extends Dialog
 						boolean flag = QRCodeUtil.createQRImage(res.getData().getPayURL(),220,220,null,ZZFileTools.getInstance().getQRCodePath(getContext()));
 						getLocalBitmap(ZZFileTools.getInstance().getQRCodePath(getContext()));
 						System.out.println("二维码图片生成结果：" + flag);
-                        //启动一个计时器
+					    if(flag){  //生成成功进行保存
+							appContext.saveLong(GDHttpTools.GD_CMHORDERSUCCES_STARTTIME + product.getProductId(),System.currentTimeMillis());
+						}
+
+						//启动一个计时器
                         final Long saveTime = appContext.getLong(GDHttpTools.GD_CMHORDERSUCCES_STARTTIME + product.getProductId());
+						Log.i("ZZPayDialog", "iUpdateData saveTime==" + saveTime);
+						if(zhifubaoRefreshTimer!=null){
+							zhifubaoRefreshTimer.cancel();
+							zhifubaoRefreshTimer=null;
+						}
                         zhifubaoRefreshTimer = new Timer();
                         zhifubaoRefreshTimer.schedule(new TimerTask() {
                             @Override
                             public void run() {
                                 Long nt = System.currentTimeMillis();
                                 if (nt - saveTime >appTimeout) {
+								//if (nt - saveTime >10*1000) {
+									Log.i("ZZPayDialog", "run() 大于5min的情况下    nt - saveTime==" + (nt - saveTime));
                                     String orderID = res.getData().getOrderID();
+									Log.i("ZZPayDialog", "run() cancelCMHOrder !!");
                                     GDHttpTools.getInstance().cancelCMHOrder(context, "0", orderID, Var.userId, GDHttpTools.getInstance().getUsertokenAIDL(), iUpdateData);//5min超时了，取消一下订单
                                     if (!appContext.deleteObject(GDHttpTools.GD_CMHORDERRES + product.getProductId())){
-                                        Log.i("ZZPayDialog", "删除res在超过5min的时候");
+                                        Log.i("ZZPayDialog", "run() 删除res在超过5min的时候");
                                     }
                                     handler.sendEmptyMessage(5);//取消二维码显示,并且删除上一次订购的信息GDOrdercmhOrderRes
-                                    this.cancel();//取消定时器
+									zhifubaoRefreshTimer.cancel();//取消定时器
 									zhifubaoRefreshTimer = null;
                                 }else {//在时间少于5min的情况下，就查询订单
-                                    GDHttpTools.getInstance().cmhCheckOrder("0",Var.userId,product.getChannelid(),product.getProductId(),GDHttpTools.getInstance().getUsertokenAIDL(),iUpdateData);
+									Log.i("ZZPayDialog", "run() < 5min  在时间少于5min的情况下，就查询订单 " );
+
+									GDHttpTools.getInstance().cmhCheckOrder("0",Var.userId,product.getChannelid(),product.getProductId(),GDHttpTools.getInstance().getUsertokenAIDL(),iUpdateData);
                                 }
                             }
                         }, 0, 2000);
@@ -769,7 +794,7 @@ public class ZZPayDialog extends Dialog
 				GDCancelCMHOrderRes res = (GDCancelCMHOrderRes) object;
 				if (isSuccess) {
 					if (res.getCode().equals("51000")) {
-						handler.sendEmptyMessage(0);
+						handler.sendEmptyMessage(0); //刷新 生成新的订单二维码
 					}
 				}else {
                     Log.i("ZZPayDialog", "GDCancelCMHOrder Fail");

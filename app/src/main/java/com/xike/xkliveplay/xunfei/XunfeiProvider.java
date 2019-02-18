@@ -40,7 +40,7 @@ public class XunfeiProvider extends ContentProvider
 	private static final int UNICHANNEL = 100;
 	private static final String path = "livechannels";
 	private static final String uniPath = "livechannels/{no}";
-	public static final String CODE = "sdmgd_uni";
+	public static final String CODE = "sdmgd";
 	private static String strURI = "com.iflytek.xiri.provider."+CODE;
 	
 	private static final String MIME_ALLCHANNELS = "vnd.android.cursor.dir/vnd.com.iflytek.xiri.provider."+CODE+".livechannels";

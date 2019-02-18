@@ -38,6 +38,7 @@ import com.mernake.framework.tools.MernakeSharedTools;
 import com.shandong.shandonglive.zengzhi.ui.ZZDialogTools;
 import com.shandong.shandonglive.zengzhi.ui.ZZFileTools;
 import com.shandong.shandonglive.zengzhi.ui.ZZOrderDialog;
+import com.shandong.shandonglive.zengzhi.ui.ZZOrderHistoryActivity;
 import com.umeng.analytics.MobclickAgent;
 import com.xike.xkliveplay.R;
 import com.xike.xkliveplay.activity.ActivityLaunchBase;
@@ -757,7 +758,10 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 			}else if(curMenuIndex == 2)
 			{
 				setAllInvisible();
-			}
+				//TODO
+                getActivity().startActivity(new Intent(getActivity(), ZZOrderHistoryActivity.class));
+
+            }
 		}
 	}
 	
@@ -774,7 +778,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	public void onPause() 
 	{
 		super.onPause();
-		MobclickAgent.onPageEnd("FragmentLivePlay"); 
+		MobclickAgent.onPageEnd("FragmentLivePlay");
+        stopCountDownOrdismissOrderDialog();
 	}
 
 	private void onKeyDownOperatorChannelList(int keyCode) 
@@ -1757,6 +1762,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 			arcPlayControl.stop();
 			arcPlayControl = null;
 		}
+
+
 		 /*if (!isJumpTo)
 		{
 			getActivity().finish();
@@ -1978,8 +1985,11 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		@Override
 		public void run() {
 			while (true) {
+				LogUtil.i(tag,"myRunnable", "is always runing !!!!");
+
 				if (timekeyDownShift > 0 && Calendar.getInstance().getTimeInMillis() - timekeyDownShift > 500) 
 				{//TimeShift
+					LogUtil.i(tag,"myRunnable", "TimeShift");
 					Message msg = new Message();
 					Bundle b = new Bundle();
 					b.putString("msg", "4");
@@ -2037,7 +2047,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 				
 				if (timeInvisiable > 0 && System.currentTimeMillis() - timeInvisiable > 2000) 
 				{
-					
+					LogUtil.i(tag,"myRunnable", "MSG_INVISIABLE_BG");
 					hd.sendEmptyMessage(MSG_INVISIABLE_BG);
 				}
 				
@@ -2602,7 +2612,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	{
 		resetLeftAndRightTime();
 		consumeTime = (int)((rightTime_miliSecond - timekeyDownShift) / 1000 / 60);
-		if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) 
+		LogUtil.e(tag,"updateMiddleTime"," consumeTime=="+consumeTime);
+		if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT)
 		{
 			curMiddleTime = curMiddleTime - step - consumeTime;
 		}else{
@@ -2686,6 +2697,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 
 	private void replaceMiddleTime(int marginLeft)
 	{
+		LogUtil.e(tag, "replaceMiddleTime","marginLeft== " + marginLeft);
+
 		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 		
@@ -2712,12 +2725,16 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	
 	private void jumpToNewTime()
 	{
+		LogUtil.i(tag,"jumpToNewTime", "jumpToNewTime() timeshift_shift_url=="+timeshift_shift_url);
 		timeshift_shift_url = getShiftUrl();
+		LogUtil.i(tag,"jumpToNewTime", "timeshift_shift_url=="+timeshift_shift_url);
 		convertToPlayNewUrl();
 	}
 	
 	private void convertToPlayNewUrl() 
 	{
+		LogUtil.i(tag,"convertToPlayNewUrl()","");
+
 		surfaceView.stop();
 		ContentChannel newChannel = new ContentChannel();
 		if (curShowChannelList == null || curShowChannelList.size() == 0
@@ -2757,6 +2774,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		
 		long shiftTime = (TIME_SHIFT_TOTAL_TIME - sb_timeshift_process.getProgress()) * 60;
 //		long urlTime = rightTime_miliSecond - shiftTime;
+		LogUtil.i(tag,"getShiftUrl", "shiftTime=="+shiftTime);
 		if (shiftTime == 0) 
 		{
 			setTimeshiftTextVision(false);
@@ -3189,7 +3207,9 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 					if (surfaceView!= null) {
 						surfaceView.pause();//暂停播放
 					}
-					ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity());
+					if(getActivity()!=null){
+                        ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity());
+                    }
 				}
 
 			}else if (method.equals(GDHttpTools.METHOD_ORDER_PLAYAUTH) && !isSuccess) {

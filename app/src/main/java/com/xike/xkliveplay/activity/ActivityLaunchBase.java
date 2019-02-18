@@ -15,6 +15,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.AnimationDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,16 +24,20 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ab.util.AbSharedUtil;
 import com.arcsoft.media.Common;
 import com.iflytek.xiri.Feedback;
 import com.iflytek.xiri.scene.ISceneListener;
 import com.iflytek.xiri.scene.Scene;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.StringCallback;
 import com.umeng.analytics.MobclickAgent;
 import com.xike.xkliveplay.R;
 import com.xike.xkliveplay.activity.fragment.FragmentBackPlayBase;
@@ -40,6 +45,7 @@ import com.xike.xkliveplay.activity.fragment.FragmentBase;
 import com.xike.xkliveplay.activity.fragment.FragmentLivePlayBase;
 import com.xike.xkliveplay.activity.fragment.FragmentRecommendBase;
 import com.xike.xkliveplay.activity.fragment.IFragmentJump;
+import com.xike.xkliveplay.entity.UpdateResponse;
 import com.xike.xkliveplay.framework.db.DBManager;
 import com.xike.xkliveplay.framework.entity.AuthRes;
 import com.xike.xkliveplay.framework.entity.AuthenticationRes;
@@ -64,6 +70,7 @@ import com.xike.xkliveplay.framework.tools.P2pSettingTool;
 import com.xike.xkliveplay.framework.tools.SharedPreferenceTools;
 import com.xike.xkliveplay.framework.tools.UIUtils;
 import com.xike.xkliveplay.framework.varparams.Var;
+import com.xike.xkliveplay.gd.GDHttpTools;
 import com.xike.xkliveplay.smarttv.Config;
 import com.xike.xkliveplay.xunfei.XunfeiInsideConstant;
 import com.xike.xkliveplay.xunfei.XunfeiTools;
@@ -74,7 +81,10 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,6 +97,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.Response;
 
 /**
  * @author LiWei <br>
@@ -128,7 +142,7 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
      * Update live apk save path
      **/
     public String downloadApkPath = "";
-
+    public String downloadVodApkPath="";
     /**
      * Handler message.DATABASE has data to read.
      **/
@@ -167,6 +181,8 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
 
     private Scene mScene = null;
     private Feedback mFeedback;
+    private UpdateResponse updateResponse;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -333,6 +349,7 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
      */
     private void initDownloadAPKPath() {
         downloadApkPath = this.getFilesDir().getAbsolutePath() + "/xklive.apk";
+        downloadVodApkPath = this.getFilesDir().getAbsolutePath() + "/vod.apk";
     }
 
     /**
@@ -991,11 +1008,134 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
            startActivity(intent);
            //		this.finish();
        }else{
-           UIUtils.showToast("点播APK没有安装！");
+           UIUtils.showToast("点播APK没有安装！",Toast.LENGTH_LONG);
+           downLoadVod();
        }
 
     }
 
+    private void downLoadVod() {
+       // showUpdateDialog("http://ctc.allook.cn/apkandroid/CTCSJT_Android_V3.2.0.apk", false);
+        String url="http://cmup.snctv.cn/api/liveUpgrade2.action";
+        int versionCode = 1;//没有点播app才会走到这里，所以写死
+        String appPackName = "com.shandong.vod";//写死点播app
+        String mac = getReqMac();
+        String operator = SystemProperties.get("ro.build.operator");
+        String hard = SystemProperties.get("ro.build.hard");
+        String equipment = SystemProperties.get("ro.build.equipment");
+        if("1".equals(GDHttpTools.getInstance().getTag())){ //HW
+            equipment="CMh_"+equipment;
+        }else{  //ZTE
+            equipment="CMz_"+equipment;
+        }
+        LogUtil.e(tag, "getUpdateVaram:","operator= " + operator + " hard= " + hard + " equipment= " + equipment);
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        builder.append("<LiveUpgrageRequest>");
+        builder.append("<operators>" + operator + "</operators>");
+        builder.append("<hard>" + hard + "</hard>");
+        builder.append("<equipment>" + equipment + "</equipment>");
+
+        builder.append("<version>" + versionCode + "</version>");
+        builder.append("<mac>" + mac + "</mac>");
+        builder.append("<packageName>" + appPackName + "</packageName>");
+        builder.append("</LiveUpgrageRequest>");
+
+        OkGo.post(url).upString(builder.toString(), MediaType.parse("text/xml")).execute(new StringCallback() {
+            @Override
+            public void onSuccess(String s, Call call, Response response) {
+                if (s != null && !s.equals("")) { //连接成功,但返回的s不为空
+                    Log.e("MARK", "UpdateCheck,result:" + s);
+                    try {
+                        updateResponse = parseXMLS(s);
+                        Log.e("MARK", "UpdateCheck,xml parse result:" + updateResponse.toString());
+                        if (updateResponse.getResultCode() == 0&&updateResponse.getUrl()!="") {
+                            showInstallDialog(updateResponse.getUrl(), false);
+                        } else {
+                            Log.e("MARK", "UpdateCheck," + "result code<>0 (" + updateResponse.getResultCode() + "),not update");
+                        }
+                    } catch (XmlPullParserException e) { //xml解析异常
+                        Log.e("MARK", "UpdateCheck," + "xml parse error,not update");
+                        e.printStackTrace();
+                    } catch (IOException e) { //xml解析方法异常
+                        Log.e("MARK", "UpdateCheck," + "parseXml error,not update");
+                        e.printStackTrace();
+                    }
+
+                 } else { //连接成功,但返回的s为空
+                      Log.e("MARK", "UpdateCheck," + "connect ok,but s is empty.");
+                }
+            }
+
+            @Override
+            public void onError(Call call, Response response, Exception e) {
+                super.onError(call, response, e);
+                if (response != null) {
+                    Log.e("MARK", "UpdateCheck," + "访问错误,返回数据:" + response.toString());
+                } else {
+                    Log.e("MARK", "VodMovie," + "访问错误,返回数据是空的！");
+                }
+             }
+        });
+
+    }
+
+
+    // 解析返回的xml文件,解析Okgo的s
+    private UpdateResponse parseXMLS(String s) throws XmlPullParserException, IOException {
+        InputStream in = new ByteArrayInputStream(s.getBytes());
+        XmlPullParser pullParser = Xml.newPullParser();
+        pullParser.setInput(in, "UTF-8");
+        //response = new UpdateResponse();
+        int event = pullParser.getEventType();
+        while (event != XmlPullParser.END_DOCUMENT) {
+            switch (event) {
+                case XmlPullParser.START_DOCUMENT:
+                    updateResponse = new UpdateResponse();
+                    break;
+                case XmlPullParser.START_TAG:
+                    // 取属性
+                    // int id = new Integer(pullParser.getAttributeValue(0));
+                    if ("resultCode".equals(pullParser.getName()))
+                        updateResponse.setResultCode(Integer.valueOf(pullParser.nextText()));
+                    if ("operators".equals(pullParser.getName()))
+                        updateResponse.setOperators(Integer.valueOf(pullParser.nextText()));
+                    if ("hard".equals(pullParser.getName()))
+                        updateResponse.setHard(pullParser.nextText());
+                    if ("equipment".equals(pullParser.getName()))
+                        updateResponse.setEquipment(pullParser.nextText());
+                    if ("version".equals(pullParser.getName()))
+                        updateResponse.setVersion(Integer.valueOf(pullParser.nextText()));
+                    if ("newVersion".equals(pullParser.getName()))
+                        updateResponse.setNewVersion(Integer.valueOf(pullParser.nextText()));
+                    if ("url".equals(pullParser.getName()))
+                        updateResponse.setUrl(pullParser.nextText());
+                    if ("isMust".equals(pullParser.getName()))
+                        updateResponse.setIsMust(Integer.valueOf(pullParser.nextText()));
+                    break;
+                case XmlPullParser.END_TAG:
+                    break;
+            }
+            event = pullParser.next();
+        }
+        if (updateResponse != null && updateResponse.getUrl() != null) {
+            String resURL = updateResponse.getUrl().trim();
+            updateResponse.setUrl(resURL);
+            if (!resURL.isEmpty() && resURL != null) {
+                String[] split = updateResponse.getUrl().split("/");
+                if (split.length > 0) {
+                    updateResponse.setName(split[split.length - 1]);
+                    updateResponse.setStatus(1);
+                } else {
+                    updateResponse.setStatus(0);
+                }
+            }
+        } else {
+            updateResponse.setStatus(8);
+        }
+        return updateResponse;
+    }
     /**
      * function: Get 'ALL' category.
      *
@@ -1097,6 +1237,10 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
             {
                 pBar.setCancelable(true);
                 pBar.cancel();
+                Log.i("MARK","handleMessage msg.obj=="+msg.obj);
+                if("vod".equals(msg.obj)){
+                  beginInstall();
+                }
                 //	            update();
             } else if (msg.what == MSG_UPDATE_INIT_PROGRESSBAR) //Ready to download,init progressbar.
             {
@@ -1108,6 +1252,19 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
             }
         }
     };
+
+    private void beginInstall() {
+        if (!APKTools.isAPKComplete(getApplicationContext(), downloadVodApkPath))
+        {
+            return;
+        }
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(Uri.fromFile(new File(downloadVodApkPath)),
+                "application/vnd.android.package-archive");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
 
     /**
      *
@@ -1255,6 +1412,30 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
         dialog.show();
     }
 
+    public void showInstallDialog(final String url, boolean isForce) {
+        Dialog dialog = new AlertDialog.Builder(ActivityLaunchBase.this).setTitle("软件安装").setMessage("发现点播应用，是否安装？")
+                // set contents.
+                .setPositiveButton("安装",// set confirm button.
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                pBar = new ProgressDialog(ActivityLaunchBase.this);
+                                pBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                                pBar.setTitle("正在下载");
+                                downVodFile(url);
+                            }
+                        }).setNegativeButton("暂不安装", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                        //You should put those bind auth aidl service code here.
+                        //								paramSetting2();
+                        //								bindYDAuthComponent();
+                    }
+                }).create();
+
+        dialog.show();
+    }
+
     public void downFile(final String url) {
         pBar.show();
         new Thread() {
@@ -1306,6 +1487,61 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
         }.start();
     }
 
+    public void downVodFile(final String url) {
+        pBar.show();
+        new Thread() {
+            @SuppressLint("WorldReadableFiles")
+            public void run() {
+                HttpClient client = new DefaultHttpClient();
+                HttpGet get = new HttpGet(url);
+                HttpResponse response;
+                try {
+                    response = client.execute(get);
+                    HttpEntity entity = response.getEntity();
+                    long length = entity.getContentLength();
+                    Message msg = Message.obtain();
+                    msg.arg1 = (int) length;
+                    msg.what = MSG_UPDATE_INIT_PROGRESSBAR;
+                    handler.sendMessage(msg);
+                    InputStream is = entity.getContent();
+                    FileOutputStream fileOutputStream = null;
+                    if (is != null) {
+                        @SuppressWarnings("unused") File file = new File(downloadVodApkPath);
+                        fileOutputStream = getApplicationContext().openFileOutput("vod.apk", MODE_WORLD_READABLE);
+                        byte[] buf = new byte[1024];
+                        int ch = -1;
+                        int count = 0;
+                        while ((ch = is.read(buf)) != -1) {
+                            fileOutputStream.write(buf, 0, ch);
+                            count += ch;
+                            msg = Message.obtain();
+                            msg.arg1 = count;
+                            msg.what = MSG_UPDATE_PROGRESS_UPDATE;
+                            handler.sendMessage(msg);
+                            if (length > 0) {
+                            }
+                        }
+                    }
+                    fileOutputStream.flush();
+                    if (fileOutputStream != null) {
+                        fileOutputStream.close();
+                    }
+                    //Message msg = Message.obtain();
+                    msg = Message.obtain();
+                    msg.obj="vod";
+                    msg.what = MSG_UPDATE_BEGIN_UPDATE;
+                    handler.sendMessage(msg);
+                    //handler.sendEmptyMessage(MSG_UPDATE_BEGIN_UPDATE);
+                } catch (ClientProtocolException e) {
+                    cancelUpdatePbar();
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    cancelUpdatePbar();
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
     /**
      * function:Cancel update progress bar.
      *

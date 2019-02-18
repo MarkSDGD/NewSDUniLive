@@ -1367,6 +1367,7 @@ public class GDHttpTools
 				public void onGetData(String str)
 				{
 					showLog("广电playAuth接口："+str);
+					showLog("广电getProductListInfo接口： 广电playAuth接口=="+str);
 					if (tag.equals("1"))  //移动华为平台
 					{
 						GDOrderPlayAuthCMHWRes res = new Gson().fromJson(str, GDOrderPlayAuthCMHWRes.class);

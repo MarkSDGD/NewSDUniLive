@@ -133,6 +133,14 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
                 }
                 if (playChannel != null) {
                     playVideo(playChannel);
+                }else{
+                    try{
+                        playChannel= Var.allChannels.get(0);
+                        playVideo(playChannel);
+                        Log.e("MARK", "play default channel ,playChannel=" + playChannel);
+                     }catch (Exception e){
+                        e.printStackTrace();
+                     }
                 }
             } else if (msg.what == 4) {
                 nowTime = System.currentTimeMillis();
@@ -177,6 +185,12 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     @Override
     public void onStart() {
         super.onStart();
+        LogUtil.e("MARK", "onStart()", "getData()");
+        //获取首页数据
+        getData();
+        //延迟设置焦点
+        handler.sendEmptyMessageDelayed(2, 100);
+
     }
 
     @Override
@@ -215,14 +229,13 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
         initData();
         //初始化焦点
         initViewMove();
-        //获取首页数据
-        getData();
-        //延迟设置焦点
-        handler.sendEmptyMessageDelayed(2, 100);
+
         //事件监听
         setListener();
         return curView;
     }
+
+
 
     //初始化数据
     private void initData() {
@@ -314,6 +327,8 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
         GDHttpTools.getInstance().getRecommendData(GDHttpTools.getInstance().getTag(), new IUpdateData() {
             @Override
             public void updateData(String method, String uniId, Object object, boolean isSuccess) {
+                Log.i("MARK","getData  updateData: isSuccess==" + isSuccess+" object=="+object);
+
                 if (isSuccess && method != null && method.equals(GDHttpTools.METHOD_GETRECOMMENDDATA)) {//获取首页数据的方法
                     LiveRecommendData liveRecommendData = (LiveRecommendData) (object);
                     recommendDataList = liveRecommendData.getData();

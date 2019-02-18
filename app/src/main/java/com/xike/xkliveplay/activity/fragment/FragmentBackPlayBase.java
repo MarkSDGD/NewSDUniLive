@@ -28,8 +28,13 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.arcsoft.media.ArcPlayer.TYPE_DRM;
+import com.mernake.framework.tools.MernakeCountDownTools;
+import com.shandong.shandonglive.zengzhi.ui.ZZDialogTools;
+import com.shandong.shandonglive.zengzhi.ui.ZZFileTools;
+import com.shandong.shandonglive.zengzhi.ui.ZZOrderDialog;
 import com.umeng.analytics.MobclickAgent;
 import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.activity.ActivityLaunchBase;
 import com.xike.xkliveplay.activity.LaunchType;
 import com.xike.xkliveplay.activity.fragment.adapter.BackplayDateAdapter;
 import com.xike.xkliveplay.activity.fragment.view.AlwaysMarqueeTextView;
@@ -44,6 +49,8 @@ import com.xike.xkliveplay.framework.entity.BackplayDate;
 import com.xike.xkliveplay.framework.entity.ContentChannel;
 import com.xike.xkliveplay.framework.entity.Schedule;
 import com.xike.xkliveplay.framework.entity.UploadObject;
+import com.xike.xkliveplay.framework.entity.gd.GDAuthAidlRes;
+import com.xike.xkliveplay.framework.entity.gd.GDOrderPlayAuthCMHWRes;
 import com.xike.xkliveplay.framework.error.ErrorCode;
 import com.xike.xkliveplay.framework.http.IUpdateData;
 import com.xike.xkliveplay.framework.httpclient.HttpGetScheduleList;
@@ -54,6 +61,7 @@ import com.xike.xkliveplay.framework.tools.DateUtil;
 import com.xike.xkliveplay.framework.tools.LogUtil;
 import com.xike.xkliveplay.framework.tools.Method;
 import com.xike.xkliveplay.framework.tools.StringUtil;
+import com.xike.xkliveplay.framework.tools.UIUtils;
 import com.xike.xkliveplay.framework.varparams.Var;
 import com.xike.xkliveplay.gd.GDHttpTools;
 import com.xike.xkliveplay.smarttv.Config;
@@ -195,6 +203,10 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 	private int lastLaunchType = 1000;//这是个假定的type，一个原则是不与正在使用的launchType重复
 	private boolean fromRecommend =false;
 
+	private MernakeCountDownTools mernakeCountDownTools;
+	private Context mContext;
+	private boolean isInPlayingMode=false; //记录正在播放界面状态
+
 	public FragmentBackPlayBase() 
 	{
 		super();
@@ -270,10 +282,20 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		LogUtil.e(tag,"onCreate", "***********************回看界面create************************");
-//		SystemProperties.set("media.amplayer.displast_frame", "1");
+		mContext = getActivity().getApplicationContext();
+		//		SystemProperties.set("media.amplayer.displast_frame", "1");
 		initParam();
 	}
-	
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		if(isInPlayingMode){
+			isInPlayingMode=false;
+		   playVideo();
+		}
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -284,7 +306,8 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 	public void onPause() 
 	{
 		super.onPause();
-		MobclickAgent.onPageEnd("FragmentBackPlay"); 
+		MobclickAgent.onPageEnd("FragmentBackPlay");
+		stopCountDownOrdismissOrderDialog();
 	}
 	
 	@Override
@@ -400,7 +423,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 		
 		/**初始化变量**/
 		curList = 1;
-		
+		isInPlayingMode=false;
 		/** 监控发送刷新节目单的请求**/
 		Thread thread = new Thread(myRunnable);
 		thread.start();
@@ -723,10 +746,10 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 		}
 		
 		super.onStop();
-		if(!isJumpTo)
+		/*if(!isJumpTo)
 		{
 			getActivity().finish();
-		}
+		}*/
 	}
 	private boolean isNeedRefresh = true;
 	public boolean onKeyDown(int keyCode, KeyEvent event) 
@@ -932,6 +955,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 					arcPlayControl = null;
 				}
 				surfaceView.stop();
+				stopCountDownOrdismissOrderDialog();
 				//				moveCurSchedule();
 			}
 			return;
@@ -965,6 +989,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 					SystemProperties.set("libplayer.livets.softdemux", "1");
 				}
 				surfaceView.stop();
+				stopCountDownOrdismissOrderDialog();
 //				moveCurSchedule();
 			}
 		} else 
@@ -991,6 +1016,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 					arcPlayControl = null;
 				}
 				surfaceView.stop();
+				stopCountDownOrdismissOrderDialog();
 //				moveCurSchedule();
 			}
 		}
@@ -1374,6 +1400,8 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 		process_seekBar.setProgress(0);
 		lastSeekTime = 0;
 		setBackplayingText();
+
+		///
 		if (arcPlayControl != null) 
 		{
 			arcPlayControl.stop();
@@ -1429,9 +1457,41 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 //		initArcPlayTestData("http://119.164.58.177:80/88888888/16/20170717/269693985/1.m3u8",
 //				curShowChannelList.get(curChannel).getContentId());
 		arcPlayControl.arcPlayer_play();
+		isInPlayingMode=true;
+		/// 试看
+		curPlayingChannel=curShowChannelList.get(curChannel);
+		if(curPlayingChannel!=null){
+			stopCountDownOrdismissOrderDialog();
+			Log.i("MARK","curPlayingChannel.getCountry()=="+curPlayingChannel.getCountry());
+
+			if (Var.isZZEnabled&&curPlayingChannel.getCountry().equals("true"))  //当开启增值模块，并且要播放的这个频道是一个付费频道的时候，启动一个5分钟的定时器
+			{
+				mernakeCountDownTools = new MernakeCountDownTools();
+				mernakeCountDownTools.setSumSec(Var.vipTryPlayLength);//试看一分半钟，这是计时器
+				mernakeCountDownTools.addListener(iCountDownMessage);
+				mernakeCountDownTools.startCountDown();
+				//VIP频道就要重新获取一下AIDL数据,这是防止userToken过期用的
+				//int opTag = Var.isYD ? 1:0;//首先要赋值tag，也就是需要进行getAIDL访问
+				int opTag = 1; //移动
+				GDHttpTools.getInstance().getAIDLData(getActivity().getApplicationContext(), opTag+"", gdIupdata);
+			}
+		}
+
+
 	}
 
-	
+	@Override
+	public void stopCountDownOrdismissOrderDialog() {
+		if (mernakeCountDownTools != null) {
+			mernakeCountDownTools.stopCountDown();
+			mernakeCountDownTools = null;
+		}
+		//有的时候，增值的界面的显示是不正确的，这时候要取消掉，防止产生不可预知的错误，比如断网了，比如去设置界面又回来了
+		ZZOrderDialog zzOrderDialog = ZZDialogTools.getInstance().getZzOrderDialog();
+		if (zzOrderDialog !=null && zzOrderDialog.isShowing()){
+			zzOrderDialog.dismiss();
+		}
+	}
 	/**
 	* 时间前推或后推分钟,其中JJ表示分钟.
 	*/
@@ -2034,7 +2094,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 			
 			Bundle b = msg.getData();
 			String info = b.getString("msg");
-//			LogUtil.i(tag, "myHandler -->msg:" + info);
+			LogUtil.i("MARK", "handleMessage ","myHandler -->msg:" + info);
 //			LogUtil.e(tag, "received msg = " + info);
 			if (info.equals("2")) //切换频道,请求节目单
 			{
@@ -2105,6 +2165,12 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 		/* 重新请求新频道当天的节目单 */
 		if (curShowChannelList != null && curChannel < curShowChannelList.size()) 
 		{
+			//先清除上个频道的节目单
+			if(lv_backplay_schedule != null)
+			{
+				lv_backplay_schedule.clearDrawList();
+			}
+			//先清除上个频道的节目单
 			Calendar calendar = Calendar.getInstance();
 			Date nowdate = calendar.getTime();
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
@@ -2141,6 +2207,12 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 		/* 请求某天的节目单 */
 		if (curShowChannelList != null && curChannel < curShowChannelList.size()) 
 		{
+			/*//先清除上个date频道的节目单
+			if(lv_backplay_schedule != null)
+			{
+				lv_backplay_schedule.clearDrawList();
+			}
+			//先清除上个上个date的节目单*/
 			Calendar calendar = Calendar.getInstance();
 			Date nowdate = calendar.getTime();
 			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
@@ -2476,6 +2548,7 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 				arcPlayControl = null;
 			}
 			surfaceView.stop();
+			stopCountDownOrdismissOrderDialog();
 		}else if (rl_backplay_main.getVisibility() == View.VISIBLE) 
 		{
 			iFragmentJump.jumpToFramgment(LaunchType.TYPE_LIVE, 0);
@@ -2673,7 +2746,163 @@ public class FragmentBackPlayBase extends FragmentBase implements IUpdateData,IP
 			}
 		}
 	};
-	
-	
-	
+
+	Handler hd = new Handler();
+	private MernakeCountDownTools.ICountDownMessage iCountDownMessage = new MernakeCountDownTools.ICountDownMessage()
+	{
+		@Override
+		public void onCountDownFinished()
+		{
+			hd.post(new Runnable() {
+				@Override
+				public void run() {
+					doSomethingWhenCountdownFinished();
+				}
+			});
+
+		}
+
+		@Override
+		public void onCountDownExcuting(int i, int i1)
+		{
+			//			showToast("倒计时进行中，剩余时间：" +i + "__"+i1);
+			Log.e("xumin", "倒计时: " + i + "__" + i1);
+		}
+
+		@Override
+		public void onCountDownStart()
+		{
+			UIUtils.showToast("该频道为VIP频道");
+		}
+
+		@Override
+		public void onCountDownStop()
+		{
+			//			showToast("倒计时停止");
+			mernakeCountDownTools = null;//将计数器置空
+		}
+	};
+	/**用来存放准备播放，但是还没进行播放鉴权的频道**/
+	private ContentChannel zzTempChannel;
+	private void doSomethingWhenCountdownFinished()
+	{
+		Log.i("MARK", "doSomethingWhenCountdownFinished mContext=="+mContext+"  curPlayingChannel=="+curPlayingChannel);//
+
+		//TODO 进行播放鉴权工作 1.时间超过8小时，自动删除缓存。2.优先读取缓存。3.无缓存时进行playauth请求
+
+		ZZFileTools.getInstance().isTimeToClearCache(mContext,curPlayingChannel.getContentId());
+
+		GDOrderPlayAuthCMHWRes res = ZZFileTools.getInstance().queryChannelPlayAuth(mContext,curPlayingChannel.getContentId());
+		if (res!=null){
+			GDHttpTools.getInstance().addPlayAuthList(curPlayingChannel.getContentId(),res);//读到了就一定是51000-1的code
+		}
+
+		if (res != null && "51000-1".equals(res.getCode())) {
+			Log.e("MARK", "本地是正确的，还在授权期限内，正常播放");//这里缓存中的信息是51000-1，准许播放的，然后缓存时间也是在允许的范围内,这时候就让他播放，啥都不管
+		}else {//res 为空、或者是因其他不可知原因code不是51000-1了，这里就得重新申请授权
+			zzTempChannel = curPlayingChannel;
+			Log.e("MARK", "重新申请授权");//
+			GDHttpTools.getInstance().playAuth(mContext,"0",GDHttpTools.getInstance().getTag(),curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,"",Var.userId,Var.userToken,GDHttpTools.getInstance().getEpgurlAIDL(),GDHttpTools.getInstance().getUsertokenAIDL(),gdIupdata);
+		}
+
+	}
+
+
+	private IUpdateData gdIupdata = new IUpdateData()
+	{
+		@Override
+		public void updateData(String method, String uniId, Object object, boolean isSuccess)
+		{
+
+
+			if (method.equals(GDHttpTools.METHOD_ORDER_PLAYAUTH) && isSuccess)
+			{
+				System.out.println("GD live order playauth request success!!!");
+				GDOrderPlayAuthCMHWRes res = (GDOrderPlayAuthCMHWRes) object;
+				if (res == null) {
+					System.out.println("GD live order playauth reques res = null");
+					return;
+				}
+				if ( res.getCode().equals("51000-1"))//51A00-1 --> 51000-1
+				{ //the channel can play
+					GDHttpTools.getInstance().setNeedReplay(true);//这里查询成功了，虽然没有暂停，但是也设置一下这个可以重新播放的参数
+				}else if (res.getCode().equals("51000-2"))//51A00-2 --> 51000-2
+				{//the channel need to buy
+					UIUtils.showToast("试看结束，请订购观看");
+					GDHttpTools.getInstance().setNeedReplay(false);//不准重新播放，直到订购成功
+
+					if (surfaceView!= null) {
+						surfaceView.pause();//暂停播放
+					}
+					ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity());
+				}
+
+			}else if (method.equals(GDHttpTools.METHOD_ORDER_PLAYAUTH) && !isSuccess) {
+				GDOrderPlayAuthCMHWRes res = (GDOrderPlayAuthCMHWRes) object;
+				if (res == null) {
+					System.out.println("res = null && isSuccess = false");
+					return;
+				}
+				if ("51041-507".equals(res.getCode())) {//GD不通过，CM通过的情况下，需要继续播放，并且将该订单同步到百图平台
+					Log.e("xumin", "GD不通过， CM通过");
+					//					GDHttpTools.getInstance().cmhOrderSync(mContext, "0", res.getStartTime(), Var.userId, GDHttpTools.getInstance().getUsertokenAIDL(), "", res.getData().getProductid(), );
+					GDHttpTools.getInstance().setNeedReplay(false);//不准重新播放，直到订购成功
+					if (surfaceView!= null) {
+						surfaceView.pause();//暂停播放
+					}
+					System.out.println("xumin: playauth: res.getData().size(): " + res.getData().size());
+					if (res.getData() != null && res.getData().size() != 0) {//这里是判断了以下，有产品列表的,需要显示产品列表，同时需要带着这个错误码下去，用来告诉ZZChooseProductActivity这个是GD不通过，CM通过的，需要将这个OrderId传都
+						ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity(),"51041-507");
+					}else {//产品列表为空，所以显示错误信息,也就是有可能返回的产品列表的size为0,这时候就显示出错误就好.
+						System.out.println("xumin: playauth: 没有从百途拿到产品列表");
+						//						ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity(),"51041-507");
+						((ActivityLaunchBase)getActivity()).showGDErrorDialog(res.getCode(),res.getDescription(),"","");//GD不通过，CM通过
+					}
+
+				}else if ("51041-506".equals(res.getCode())){
+					Log.e("xumin", "GD通过， CM不通过");
+					GDHttpTools.getInstance().setNeedReplay(false);//不准重新播放，直到订购成功
+					if (surfaceView!= null) {
+						surfaceView.pause();//暂停播放
+					}
+					//51041-506和51041-507的情况下，都是要有产品列表返回的，因为这个时候，需要再次弹出订购页面。需要拿着这个产品ID，继续去订购
+					System.out.println("xumin: playauth: res.getData().size(): " + res.getData().size());
+					if (res.getData() != null && res.getData().size() != 0) {//这里是判断了一下，有产品列表的
+						ZZDialogTools.getInstance().showOrderDialog(curShowChannelList.get(curChannel).getName(),Var.userId,curShowChannelList.get(curChannel).getContentId(),Var.allCategoryId,getActivity());
+					}else {//产品列表为空，所以显示错误信息
+						System.out.println("xumin: playauth: 没有从华为拿到产品列表");
+						((ActivityLaunchBase)getActivity()).showGDErrorDialog(res.getCode(),res.getDescription(),"","");
+					}
+
+				}else {//这是错误码是其他情况，就直接弹出错误码,并且暂停播放
+					GDHttpTools.getInstance().setNeedReplay(false);//不准重新播放，直到订购成功
+					if (surfaceView!= null) {
+						surfaceView.pause();//暂停播放
+					}
+					((ActivityLaunchBase)getActivity()).showGDErrorDialog(res.getCode(),res.getDescription(),"","");
+				}
+			}
+
+
+
+			if (method.equals(GDHttpTools.METHOD_GETAIDLDATA)) {
+				//不为别的，仅仅是在VIP节目的时候，请求一下aidl接口，在这里保存下，防止过会儿使用的userToken是过期的
+				if (isSuccess)
+				{
+					GDAuthAidlRes res = (GDAuthAidlRes) object;
+					String operaTag = "";
+					if (res.getData().getOperaTag().equals("HW")){
+						operaTag = "1";
+					}else if (res.getData().getOperaTag().equals("ZTE")){
+						operaTag = "2";
+					}
+					GDHttpTools.getInstance().setTag(operaTag);
+					GDHttpTools.getInstance().setAIDLParam(res.getData().getEPGURLAIDL(),res.getData().getUserTokenAIDL(),res.getData().getIPTVAccountAIDL());
+				}
+			}
+		}
+
+	};
+
+
 }
