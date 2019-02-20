@@ -23,6 +23,7 @@ import com.xike.xkliveplay.activity.dialogerror.DialogBroadcastReceiver;
 import com.xike.xkliveplay.activity.dialogerror.gd.GDDialogTools;
 import com.xike.xkliveplay.activity.fragment.FragmentBackPlayBase;
 import com.xike.xkliveplay.activity.fragment.FragmentLivePlayBase;
+import com.xike.xkliveplay.activity.fragment.FragmentRecommendBase;
 import com.xike.xkliveplay.framework.entity.ActivateTerminal;
 import com.xike.xkliveplay.framework.entity.ActivateTerminalRes;
 import com.xike.xkliveplay.framework.entity.AuthRes;
@@ -131,7 +132,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         MernakeSharedTools.setSharedFileName("FragmentLivePlay");
-        P2pSettingTool.FILE_CONTENT = "front_move=10\ncache_maxnum=10\nuse_mem_file=1\nrep2server_enable=0\nserver_port=65500\nserver_host=cmco.snctv.cn\nlog_logcat=1\nuse_dns=0\n";
+        P2pSettingTool.FILE_CONTENT = "front_move=10\ncache_maxnum=10\nuse_mem_file=1\nrep2server_enable=0\nserver_port=65500\nserver_host=cmco.snctv.cn\nlog_logcat=1\nuse_dns=1\n";
         FragmentLivePlayBase.TIME_SHIFT_TOTAL_TIME = 60 * 3;
         Var.netIP = APKTools.getPsdnIp();
 
@@ -199,6 +200,13 @@ public class ActivityLaunch extends ActivityLaunchBase {
                     }
                 } else { //说明这次启动机顶盒之后，直播还没有启动过
                     GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", iGDupdata);
+                }
+            }else if(curFragment instanceof FragmentRecommendBase){
+                if (!NetStatusChange.getInstance().checkNet(ActivityLaunch.this))        // Check network is ok.
+                {
+                    return;
+                }else{
+                    ((FragmentRecommendBase)curFragment).getData();
                 }
             }
         }

@@ -325,7 +325,7 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     }
 
     //获取首页数据
-    private void getData() {
+    public void getData() {
         GDHttpTools.getInstance().getRecommendData(GDHttpTools.getInstance().getTag(), new IUpdateData() {
             @Override
             public void updateData(String method, String uniId, Object object, boolean isSuccess) {

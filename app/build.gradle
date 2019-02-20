@@ -7,8 +7,8 @@ android {
         applicationId "com.xike.xkliveplay"
         minSdkVersion 11
         targetSdkVersion 15
-        versionCode 127
-        versionName "CM-v1.2.7"
+        versionCode 300
+        versionName "CM-v3.0.0"
     }
 
     buildTypes {
@@ -28,12 +28,12 @@ android {
                 if ((variant.buildType.name).equals('release')) {
                     //fileName = "RELEASE${defaultConfig.versionName}.${getTime()}.apk"
                    // fileName = android.compileSdkVersion+"HaiKanLive.apk"
-                    outputFileName="HK_ShanDongLive_Uni_"+versionName+"_Release.apk"
+                    outputFileName="ShanDongLive_Uni_"+versionName+"_Release.apk"
 
 
                 } else if ((variant.buildType.name).equals('debug')) {
                    // fileName = android.compileSdkVersion+"HaiKanLive_debug.apk"
-                     outputFileName="HK_ShanDongLive_Uni_"+versionName+"_Debug.apk"
+                     outputFileName="ShanDongLive_Uni_"+versionName+"_Debug.apk"
 
                 }
              }
@@ -55,7 +55,7 @@ dependencies {
     api files('libs/umeng-analytics-v5.6.1.jar')
     api files('libs/XiriFeedback.jar')
     api files('libs/XiriScene.jar')
-    api files('libs/shandongSDK_V1.3.38.jar')
+    api files('libs/shandongSDK_V1.3.39.jar')
     api files('libs/ArcPlayer.jar')
 //    api files('libs/shandongSDK_V1.2_2018081601.jar')
     api 'com.orhanobut:hawk:2.0.1'
