@@ -2,7 +2,7 @@ package com.xike.xkliveplay.framework.error;
 
 import android.content.Context;
 import android.content.Intent;
-import android.text.StaticLayout;
+import android.util.Log;
 
 /**
  * @author LiWei <br>
@@ -19,7 +19,8 @@ public class SendBroadcastTools
 	
 	public static void sendErrorBroadcast(Context context,String action,String mac,String userId)
 	{
-		
+		Log.i("MARK"," sendErrorBroadcast");
+
 		cancelDialog(context);
 		Intent intent = new Intent();
 		intent.setAction(ErrorBroadcastAction.ERROR_LIVEPLAY_ACTION);

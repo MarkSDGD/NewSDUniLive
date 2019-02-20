@@ -14,6 +14,7 @@ package com.xike.xkliveplay.framework.httpclient;
 import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.xike.xkliveplay.framework.entity.ContentChannel;
 import com.xike.xkliveplay.framework.entity.Schedule;
@@ -149,6 +150,7 @@ public class DataModel
 			{
 				if (channel.getContentId().equals(schedule.getChannelId())) 
 				{
+					Log.i("MARK"," initAll6Schedules schedule StartDate=="+schedule.getStartDate()+"  StartTime=="+schedule.getStartTime());
 					tempList.add(schedule);
 				}else continue;
 			}
@@ -158,29 +160,48 @@ public class DataModel
 
 	public Schedule[] getSchedule(String channelId, String time)
 	{
+		Log.i("MARK"," getSchedule channelId=="+channelId+"  time=="+time);
 		Schedule[] res = new Schedule[2];
 		res[0] = new Schedule();
 		res[1] = new Schedule();
 		res[0].setProgramName("none");
 		res[1].setProgramName("none");
+		Log.i("MARK"," getSchedule all6Map.containsKey(channelId)=="+all6Map.containsKey(channelId));
+
 		if (all6Map.containsKey(channelId))
 		{
 			List<Schedule> tempSchedules = all6Map.get(channelId);
+			Log.i("MARK"," getSchedule  tempSchedules.size()=="+tempSchedules.size());
 			for (int i = 0; i < tempSchedules.size(); i++)
 			{
 				String timea = tempSchedules.get(i).getStartDate()+tempSchedules.get(i).getStartTime();
+				Log.i("MARK"," getSchedule  timea=="+timea);
 				long timeF = Long.valueOf(timea);
 				long timeFB = Long.valueOf(time);
+				Log.i("MARK"," getSchedule  timea=="+timea);
+				Log.i("MARK"," getSchedule  timeFB=="+timeFB);
 				if (timeFB >= timeF)
 				{
+					Log.i("MARK"," getSchedule  timeFB >= timeF");
 					if (i+1<tempSchedules.size())
 					{
 						String timeb = tempSchedules.get(i+1).getStartDate()+tempSchedules.get(i+1).getStartTime();
+						Log.i("MARK"," getSchedule  timeb=="+timeb);
 						long timeNext = Long.valueOf(timeb);
 						if (timeFB <= timeNext)  //时间点在上一个节目的开始时间和下一个节目的开始时间之间，找到了两个记录
 						{
+							Log.i("MARK"," getSchedule  timeFB <= timeNext");
 							res[0] = tempSchedules.get(i);
 							res[1] = tempSchedules.get(i+1);
+							try{
+								Log.i("MARK"," getSchedule  res[0]=="+res[0].getProgramName());
+								Log.i("MARK"," getSchedule  res[1]=="+res[1].getProgramName());
+							}catch (Exception e){
+								Log.i("MARK"," getSchedule  Exception!!");
+								e.printStackTrace();
+							}finally {
+
+							}
 							return res;
 						}
 					}
@@ -189,8 +210,18 @@ public class DataModel
 
 		}else
 		{
+			Log.i("MARK"," getSchedule  null");
+
 			System.out.println("########:null");
 			return null; //说明不存在记录，需要重新请求
+		}
+		try{
+			Log.i("MARK"," getSchedule 11 res[0]=="+res[0].getProgramName());
+			Log.i("MARK"," getSchedule 11 res[1]=="+res[1].getProgramName());
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+
 		}
 		System.out.println("########:res");
 		return res;//记录可能不完整

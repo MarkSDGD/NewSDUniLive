@@ -5,7 +5,6 @@ package com.xike.xkliveplay.framework.arcplay;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -261,7 +260,10 @@ public class ArcPlayControl implements IPlayerStateListener{
 			// TODO Auto-generated method stub
 			
 			onPlayerStateChanged(IPlayerStateListener.PLAYER_FAIL,what, extra);
-			
+			if (iCode !=null)
+			{
+				iCode.onPlayerErrorCode(what);
+			}
 
 			return false;
 		}
@@ -374,4 +376,16 @@ public class ArcPlayControl implements IPlayerStateListener{
 		this.dmrURL = dmrURL;
 	}
 
+   //Rongzai add
+	public interface IReturnPlayerErrorCode
+	{
+		void onPlayerErrorCode(int code);
+	}
+
+	private IReturnPlayerErrorCode iCode = null;
+
+	public void setiCode(IReturnPlayerErrorCode iCode)
+	{
+		this.iCode = iCode;
+	}
 }

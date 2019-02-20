@@ -36,7 +36,8 @@ public class ErrorBroadcastAction
 	public static final String ERROR_WRITE_STBINFO_ACTION = "live_error_write_stbinfo_action";
 	public static final String ERROR_CONNECT_REFUSED = "live_error_connect_refused";
 	public static final String ERROR_CONNECT_TIMEOUT = "live_error_connect_timeout";
-	
-	
-	
+
+	public static final String ERROR_PLAYER_ACTION = "live_error_player";
+
+
 }

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arcsoft.media.ArcPlayer;
+import com.google.gson.Gson;
 import com.mernake.framework.tools.MernakeSharedTools;
 import com.shandong.sdk.shandongsdk.bean.LiveRecommendData;
 import com.shandong.sdk.shandongsdk.bean.LiveRecommendDataData;
@@ -39,6 +40,7 @@ import com.xike.xkliveplay.framework.httpclient.DataModel;
 import com.xike.xkliveplay.framework.tools.AbStrUtil;
 import com.xike.xkliveplay.framework.tools.ImageUtils;
 import com.xike.xkliveplay.framework.tools.LogUtil;
+import com.xike.xkliveplay.framework.tools.SharedPreferenceTools;
 import com.xike.xkliveplay.framework.varparams.Var;
 import com.xike.xkliveplay.gd.GDHttpTools;
 
@@ -331,13 +333,30 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
 
                 if (isSuccess && method != null && method.equals(GDHttpTools.METHOD_GETRECOMMENDDATA)) {//获取首页数据的方法
                     LiveRecommendData liveRecommendData = (LiveRecommendData) (object);
+
+                    String  recommendJson = new Gson().toJson(liveRecommendData);
+                    SharedPreferenceTools.setSavedStringPreference(mContext, SharedPreferenceTools.SHARED_KEY_RECOMMEND, recommendJson, SharedPreferenceTools.SHARED_FILE_LIVEPLAY);
+
                     recommendDataList = liveRecommendData.getData();
                     //加载数据
                     if (recommendDataList != null && recommendDataList.size() >= 12) {
                         setData();
                     }
                 } else if (!isSuccess) {
-                    Toast.makeText(getActivity(), "首页数据获取失败", Toast.LENGTH_SHORT).show();
+                    String recommendJson = SharedPreferenceTools.getSavedStringPreference(mContext, SharedPreferenceTools.SHARED_KEY_RECOMMEND, SharedPreferenceTools.SHARED_FILE_LIVEPLAY);
+                    if("".equals(recommendJson)){
+                        Toast.makeText(getActivity(), "首页数据获取失败", Toast.LENGTH_SHORT).show();
+
+                    }else{
+                        Toast.makeText(getActivity(), "获取缓存的首页数据", Toast.LENGTH_SHORT).show();
+                        LiveRecommendData recommendData = new Gson().fromJson(recommendJson,LiveRecommendData.class);
+                        recommendDataList = recommendData.getData();
+                        //加载数据
+                        if (recommendDataList != null && recommendDataList.size() >= 12) {
+                            setData();
+                        }
+                    }
+
                 }
             }
         });

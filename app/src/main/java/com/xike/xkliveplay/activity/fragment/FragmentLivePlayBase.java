@@ -18,7 +18,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +33,7 @@ import android.widget.Toast;
 
 import com.arcsoft.media.ArcPlayer.TYPE_DRM;
 import com.mernake.framework.tools.MernakeCountDownTools;
+import com.mernake.framework.tools.MernakeNetTools;
 import com.mernake.framework.tools.MernakeSharedTools;
 import com.shandong.shandonglive.zengzhi.ui.ZZDialogTools;
 import com.shandong.shandonglive.zengzhi.ui.ZZFileTools;
@@ -57,7 +57,9 @@ import com.xike.xkliveplay.framework.entity.FavoriteManage;
 import com.xike.xkliveplay.framework.entity.Schedule;
 import com.xike.xkliveplay.framework.entity.gd.GDAuthAidlRes;
 import com.xike.xkliveplay.framework.entity.gd.GDOrderPlayAuthCMHWRes;
+import com.xike.xkliveplay.framework.error.ErrorBroadcastAction;
 import com.xike.xkliveplay.framework.error.ErrorCode;
+import com.xike.xkliveplay.framework.error.SendBroadcastTools;
 import com.xike.xkliveplay.framework.http.HttpUtil;
 import com.xike.xkliveplay.framework.http.IUpdateData;
 import com.xike.xkliveplay.framework.httpclient.DataModel;
@@ -74,7 +76,6 @@ import com.xike.xkliveplay.framework.tools.MernakeLogTools;
 import com.xike.xkliveplay.framework.tools.Method;
 import com.xike.xkliveplay.framework.tools.NetStatusChange;
 import com.xike.xkliveplay.framework.tools.ScreenTools;
-import com.xike.xkliveplay.framework.tools.UIUtils;
 import com.xike.xkliveplay.framework.varparams.Var;
 import com.xike.xkliveplay.gd.GDHttpTools;
 import com.xike.xkliveplay.smarttv.Config;
@@ -95,6 +96,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static com.xike.xkliveplay.framework.tools.UIUtils.showToast;
 
 /**
  * 
@@ -197,6 +200,11 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	private String jumpChannelNum = "";
 	//倒计时工具
 	private MernakeCountDownTools mernakeCountDownTools;
+
+	private int rongzaitime = 0;
+	private long remainTimeSec = 0;
+	private MernakeCountDownTools mernakeCountDownToolsRongZai;
+	private ArcPlayControl.IReturnPlayerErrorCode iCode=null;
 
 	public FragmentLivePlayBase(IFragmentJump _fJump)
 	{
@@ -349,6 +357,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		timeKeyDownRecent = System.currentTimeMillis();
 
 		//请求一下6小时节目单,但还是应该加个前提，先看下数据中心是不是已经有数据了。
+		Log.i("MARK","isAll6SchedulesExist=="+DataModel.getInstance().isAll6SchedulesExist());
 		if (!DataModel.getInstance().isAll6SchedulesExist())
 		{
 			GDHttpTools.getInstance().getLiveScheduleListXML(GDHttpTools.getInstance().getTag(),gdIupdata);
@@ -406,10 +415,185 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 			rl_bg.setVisibility(View.VISIBLE);
 			timeInvisiable = System.currentTimeMillis();
 		}
+
+
+		initRongzai();
 		
 	}
-	
-	
+
+	private void initRongzai() {
+		if (Var.isRongZaiEnabled){
+			long a = (Long)MernakeSharedTools.get(mContext,"isSwitchedPlayUrlTime",0L);
+			rongzaitime = (int) (a / 1000);
+			if (rongzaitime !=0){
+				mernakeCountDownToolsRongZai = new MernakeCountDownTools();
+				mernakeCountDownToolsRongZai.setSumSec(rongzaitime);
+				mernakeCountDownToolsRongZai.addListener(new MernakeCountDownTools.ICountDownMessage() {
+					@Override
+					public void onCountDownFinished() {
+						com.mernake.framework.tools.MernakeLogTools.showLog("容灾倒计时结束");
+						MernakeSharedTools.set(mContext,"isSwitchedPlayUrl",false);
+						MernakeSharedTools.set(mContext,"isSwitchedPlayUrlTime",0L);
+						remainTimeSec = 0;
+						mernakeCountDownToolsRongZai = null;
+					}
+
+					@Override
+					public void onCountDownExcuting(int i, int i1) {
+						com.mernake.framework.tools.MernakeLogTools.showLog("=======================");
+					}
+
+					@Override
+					public void onCountDownStart() {
+
+					}
+
+					@Override
+					public void onCountDownStop() {
+
+					}
+				});
+				mernakeCountDownToolsRongZai.startCountDown();
+			}
+		}
+
+		iCode = new ArcPlayControl.IReturnPlayerErrorCode()
+		{
+			@Override
+			public void onPlayerErrorCode(int code)
+			{
+
+				if (!Var.isRongZaiEnabled)
+				{
+					SendBroadcastTools.sendErrorBroadcast(getActivity(),
+							ErrorBroadcastAction.ERROR_PLAYER_ACTION, code+"", Var.userId);
+					return;
+				}
+
+				/*1.看code是不是100404,根据广电徐明的反馈，当播放器返回100404的时候，说明平台内容灾已经失败，
+				 *进入跨平台容灾流程。
+				 * 2.进入跨平台容灾流程后，先ping容灾控制服务器，2秒超时，即无法ping通时，直接报错。如果成功ping通表示进入跨平台容灾
+				 *3.检查本地是否有另一个平台的频道列表，有直接使用，没有去请求，将请求回来的频道列表缓存数据库
+				 * 4.找到当前的对应频道，进行播放，这次如果仍然失败，直接报错
+				 * 5.从播放开始倒计时30分钟，30分钟后当存在新的换台行为时，返回原来的平台进行访问，如果404再按照1234的流程执行
+				 *
+				 * */
+				boolean isSwitchedPlayUrl = (Boolean)MernakeSharedTools.get(mContext,"isSwitchedPlayUrl",false);
+				if (code == 100404 && isSwitchedPlayUrl)
+				{ //说明当前是已经处于跨平台容灾的情况下，结果又报错了，那只好报错了
+					com.mernake.framework.tools.MernakeLogTools.showLog("在已经处于跨平台容灾的情况下，又报错了");
+					showToast("在已经处于跨平台容灾的情况下，又报错了");
+					SendBroadcastTools.sendErrorBroadcast(getActivity(),
+							ErrorBroadcastAction.ERROR_PLAYER_ACTION, code+"", Var.userId);
+					return;
+				}
+
+				if (code == 100404) //如果是404并且是移动版本
+				{
+					com.mernake.framework.tools.MernakeLogTools.showLog("移动版本下播放器报了404错误");
+					showToast("移动版本下播放器报了404错误");
+					//					String url = "111.13.100.92";
+					String url = "211.137.203.86";
+					//					String url = "150.138.11.188";
+					com.mernake.framework.tools.MernakeLogTools.showToast(mContext,"要ping的地址是："+url);
+					boolean flag = MernakeNetTools.ping(url);
+					if (flag)
+					{
+						com.mernake.framework.tools.MernakeLogTools.showLog("ping通了容灾服务器");
+						Toast.makeText(mContext, "ping通了", Toast.LENGTH_SHORT).show();
+						MernakeSharedTools.set(mContext,"isSwitchedPlayUrl",true);
+						playVideo(curPlayingChannel);
+						countDown30Minutes();
+						//						if (Var.isOtherPlayUrlExist()){ //如果存在第二套列表，则换用第二套列表
+						//							replay();
+						//						}else{//请求
+						//							if ("1".equals(GDHttpTools.getInstance().getTag())){ //移动华为
+						//								GDHttpTools.getInstance().getStaticLiveCategoryList("2",iChannelUpdata);
+						//
+						//							}else if ("2".equals(GDHttpTools.getInstance().getTag())){//移动中兴
+						//
+						//							}
+						//						}
+					}else{//其他的所有情况都报错，这中间包括，1.没有Ping通容灾服务器的情况。2.在另外一个平台也报404的情况
+						com.mernake.framework.tools.MernakeLogTools.showLog("没有ping通容灾服务器");
+						Toast.makeText(mContext,"没ping通",Toast.LENGTH_SHORT).show();
+						SendBroadcastTools.sendErrorBroadcast(getActivity(),
+								ErrorBroadcastAction.ERROR_PLAYER_ACTION, code+"", Var.userId);
+					}
+				}else{
+					SendBroadcastTools.sendErrorBroadcast(getActivity(),
+							ErrorBroadcastAction.ERROR_PLAYER_ACTION, code+"", Var.userId);
+				}
+
+			}
+		};
+
+		if (iCode !=null)
+		{
+			setIReturnPlayerErrorCode(iCode);
+		}
+	}
+
+	public void setIReturnPlayerErrorCode(ArcPlayControl.IReturnPlayerErrorCode iCode)
+	{
+		if (arcPlayControl!=null)
+		{
+			arcPlayControl.setiCode(iCode);
+		}
+	}
+
+	private void countDown30Minutes()
+	{
+		if (mernakeCountDownToolsRongZai!=null)
+		{
+			if (rongzaitime!=0)
+			{//说明上一次容灾到现在还没到半小时
+				showToast("上一次启用容灾到现在还没有到达规定时间");
+				return;
+			}
+			mernakeCountDownToolsRongZai.stopCountDown();
+			mernakeCountDownToolsRongZai=null;
+		}
+		mernakeCountDownToolsRongZai = new MernakeCountDownTools();
+		mernakeCountDownToolsRongZai.addListener(new MernakeCountDownTools.ICountDownMessage() {
+			@Override
+			public void onCountDownFinished()
+			{
+				com.mernake.framework.tools.MernakeLogTools.showLog("容灾倒计时结束");
+				//				showToast("容灾倒计时结束");
+				MernakeSharedTools.set(mContext,"isSwitchedPlayUrl",false);
+				MernakeSharedTools.set(mContext,"isSwitchedPlayUrlTime",0L);
+				remainTimeSec = 0;
+				//				replay();
+			}
+
+			@Override
+			public void onCountDownExcuting(int i, int i1)
+			{
+				com.mernake.framework.tools.MernakeLogTools.showLog("容灾倒数：" +i+ " " +i1);
+				remainTimeSec = i1;
+
+			}
+
+			@Override
+			public void onCountDownStart()
+			{
+				com.mernake.framework.tools.MernakeLogTools.showLog("开始容灾倒计时");
+				//				showToast("开始容灾倒计时");
+			}
+
+			@Override
+			public void onCountDownStop()
+			{
+				com.mernake.framework.tools.MernakeLogTools.showLog("容灾倒计时关闭");
+				//				showToast("容灾倒计时关闭");
+			}
+		});
+		mernakeCountDownToolsRongZai.setSumSec(30 * 60);
+		mernakeCountDownToolsRongZai.startCountDown();
+	}
+
+
 
 	public int getCurVol() {
 		return curVol;
@@ -737,8 +921,24 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 
 		if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) 
 		{//Menu mode,press center.
-			if (curMenuIndex == 0) 
+			if (curMenuIndex == 0)   //回看
 			{
+				setAllInvisible();
+
+				int index = getFirstPlayInfoByChannelName(curPlayingChannel.getName());
+
+				iFragmentJump.jumpToFramgment(LaunchType.TYPE_REPLAY, index);
+				isJumpTo = true;
+
+
+			} else if (curMenuIndex == 1)  //订购
+			{
+				setAllInvisible();
+				//TODO
+				getActivity().startActivity(new Intent(getActivity(), ZZOrderHistoryActivity.class));
+			}else if(curMenuIndex == 2)  //收藏
+			{
+
 				if(!curPlayingChannel.getZipCode().equals("save"))
 				{
 					createDialoge(true);
@@ -747,19 +947,6 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 					createDialoge(false);
 					ll_liveMenu.setVisibility(View.GONE);
 				}
-			} else if (curMenuIndex == 1) 
-			{
-				setAllInvisible();
-				
-				int index = getFirstPlayInfoByChannelName(curPlayingChannel.getName());
-				
-				iFragmentJump.jumpToFramgment(LaunchType.TYPE_REPLAY, index);
-				isJumpTo = true;
-			}else if(curMenuIndex == 2)
-			{
-				setAllInvisible();
-				//TODO
-                getActivity().startActivity(new Intent(getActivity(), ZZOrderHistoryActivity.class));
 
             }
 		}
@@ -965,12 +1152,68 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		LogUtil.e(tag, "playVideo","playing program content ID is: " + playChannel.getContentId());
 		arcPlayControl.setTokenID(Var.userToken);
 		arcPlayControl.setType(0);
-		arcPlayControl.setUri(playChannel.getPlayURL());
+		arcPlayControl.setUri(dealWithUrl(playChannel.getPlayURL()));
 		timeshift_playing_url = playChannel.getTimeShiftURL();
 		arcPlayControl.setUserID(Var.userId);
 //		arcPlayControl.setDmrURL(Var.drm_domain_url);
 		arcPlayControl.arcPlayer_play();
 		timeKeyDownRecent = Calendar.getInstance().getTimeInMillis();
+	}
+
+	public String dealWithUrl(String url)
+	{
+		if (!Var.isRongZaiEnabled) return url;
+		if (!url.contains("http://") && !url.contains("https://")) return url;
+
+			//1--华为，2--中兴
+			System.out.println("######替换前播放地址是："+url);
+			showToast("替换前播放地址是："+url);
+			String platformstr =  GDHttpTools.getInstance().getTag();
+			String head = "http://";
+			url = url.replace("http://","");
+			String target = "";
+			if (platformstr.equals("1"))
+			{
+				target = "ucdn-test.sd.chinamobile.com:8089";
+			}else if (platformstr.equals("2"))
+			{
+				target = "ucdn-zte.sd.chinamobile.com:8089";
+			}
+			//            ucdn-zte.sd.chinamobile.com:8089/shandong_cabletv.live.zte.com/223.99.253.7:8081
+
+			boolean isSwitchedPlayUrl = (Boolean)MernakeSharedTools.get(getActivity(),"isSwitchedPlayUrl",false);
+			com.mernake.framework.tools.MernakeLogTools.showLog("=======> isSwitchedPlayUrl:" + isSwitchedPlayUrl);
+			if (isSwitchedPlayUrl){
+				com.mernake.framework.tools.MernakeLogTools.showLog("=======> platformstr:" + platformstr);
+				String tail = url.substring(url.indexOf("00"));
+				com.mernake.framework.tools.MernakeLogTools.showToast(mContext,"tail="+tail);
+				if (platformstr.equals("1"))//当前是华为平台，要切成中兴平台
+				{
+					head = "http://ucdn-zte.sd.chinamobile.com:8089/shandong_cabletv.live.zte.com/223.99.253.7:8081/";
+				}else if (platformstr.equals("2"))//当前是中兴平台，要切成华为平台
+				{
+					head = "http://ucdn-test.sd.chinamobile.com:8089/";
+				}
+				System.out.println("######最终替换结果是："+head+tail);
+				showToast("最终替换结果是："+head+tail);
+				return head+tail;
+			}
+
+			String temp[] = url.split("/");
+			temp[0] = target;
+			String result = head;
+			for (String str:temp)
+			{
+				if (result.equals(head)){
+					result = result + str;
+				}else
+					result = result+"/"+str;
+			}
+			System.out.println("######最终替换结果是："+result);
+			showToast("最终替换结果是："+result);
+			return result;
+
+
 	}
 
 	@Override
@@ -1288,7 +1531,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		{
 			ll_liveMenu.setVisibility(View.VISIBLE);
 		}
-
+        Log.i("MARK","KEYCODE_MENU  dealMenuUpAndDowEvent");
 		dealMenuUpAndDowEvent(curView,KeyEvent.KEYCODE_MENU);
 	}
 
@@ -1305,8 +1548,8 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 			tvOrderHistory.setVisibility(View.VISIBLE);
 		}
 
-		LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(
-				getResources().getDimensionPixelSize(R.dimen.px_214), getResources().getDimensionPixelSize(R.dimen.px_72));
+		/*LinearLayout.LayoutParams rl = new LinearLayout.LayoutParams(
+				getResources().getDimensionPixelSize(R.dimen.px_214), getResources().getDimensionPixelSize(R.dimen.px_72));*/
 
 		if (curPlayingChannel.getZipCode().equals("save")) {
 			tvSave1.setVisibility(View.INVISIBLE);
@@ -1320,15 +1563,15 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		{
 			if (curMenuIndex == 1) { //第0个单位获得焦点
 				curMenuIndex = 0;
-				fl.setBackgroundResource(R.drawable.channel_focus);
-				tView2.setBackgroundResource(getResources().getColor(
+				fl.setBackgroundResource(getResources().getColor(
 						R.color.transparent_background));
+				tView2.setBackgroundResource(R.drawable.channel_focus);
 				tvOrderHistory.setBackgroundResource(getResources().getColor(
 						R.color.transparent_background));
 
-				rl.setMargins(0, Method.getScaleY(340), 0, 0);
+				/*rl.setMargins(0, Method.getScaleY(340), 0, 0);
 				rl.gravity = Gravity.RIGHT;
-				fl.setLayoutParams(rl);
+				fl.setLayoutParams(rl);*/
 				return;
 			}
 		}
@@ -1340,34 +1583,38 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 				if (curMenuIndex == 0) 
 				{
 					curMenuIndex = 2;
-					fl.setBackgroundResource(getResources().getColor(
-							R.color.transparent_background));
-					tvOrderHistory.setBackgroundResource(R.drawable.channel_focus);
-					rl.setMargins(0, Method.getScaleY(136), 0, 0);
-					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
-					return;
-				}else if (curMenuIndex == 1) 
-				{
-					curMenuIndex = 0;
 					fl.setBackgroundResource(R.drawable.channel_focus);
 					tView2.setBackgroundResource(getResources().getColor(
 							R.color.transparent_background));
 
-					rl.setMargins(0, Method.getScaleY(340), 0, 0);
+
+					/*rl.setMargins(0, Method.getScaleY(136), 0, 0);
 					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
+					fl.setLayoutParams(rl);*/
 					return;
-				}else if (curMenuIndex == 2) 
+				}else if (curMenuIndex == 1) 
 				{
-					curMenuIndex = 1;
+					curMenuIndex = 0;
 					tvOrderHistory.setBackgroundResource(getResources().getColor(
 							R.color.transparent_background));
 					tView2.setBackgroundResource(R.drawable.channel_focus);
 
-					rl.setMargins(0, Method.getScaleY(238), 0, 0);
+					/*rl.setMargins(0, Method.getScaleY(340), 0, 0);
 					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
+					fl.setLayoutParams(rl);*/
+					return;
+				}else if (curMenuIndex == 2) 
+				{
+					curMenuIndex = 1;
+
+					fl.setBackgroundResource(getResources().getColor(
+							R.color.transparent_background));
+					tvOrderHistory.setBackgroundResource(R.drawable.channel_focus);
+
+
+					/*rl.setMargins(0, Method.getScaleY(238), 0, 0);
+					rl.gravity = Gravity.RIGHT;
+					fl.setLayoutParams(rl);*/
 					return;
 				}
 			}else if (keycode == KeyEvent.KEYCODE_DPAD_DOWN) 
@@ -1375,62 +1622,69 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 				if (curMenuIndex == 0) 
 				{
 					curMenuIndex = 1;
-					fl.setBackgroundResource(getResources().getColor(
-							R.color.transparent_background));
-					tView2.setBackgroundResource(R.drawable.channel_focus);
 
-					rl.setMargins(0, Method.getScaleY(238), 0, 0);
+					tView2.setBackgroundResource(getResources().getColor(
+							R.color.transparent_background));
+					tvOrderHistory.setBackgroundResource(R.drawable.channel_focus);
+
+
+					/*rl.setMargins(0, Method.getScaleY(238), 0, 0);
 					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
+					fl.setLayoutParams(rl);*/
 					return;
 				}else if (curMenuIndex == 1) 
 				{
 					curMenuIndex = 2;
-					tView2.setBackgroundResource(getResources().getColor(
-							R.color.transparent_background));
-					tvOrderHistory.setBackgroundResource(R.drawable.channel_focus);
-					rl.setMargins(0, Method.getScaleY(136), 0, 0);
-					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
-					return;
-				}else if (curMenuIndex == 2) 
-				{
-					curMenuIndex = 0;
 					fl.setBackgroundResource(R.drawable.channel_focus);
 					tvOrderHistory.setBackgroundResource(getResources().getColor(
 							R.color.transparent_background));
 
-					rl.setMargins(0, Method.getScaleY(340), 0, 0);
+				/*	rl.setMargins(0, Method.getScaleY(136), 0, 0);
 					rl.gravity = Gravity.RIGHT;
-					fl.setLayoutParams(rl);
+					fl.setLayoutParams(rl);*/
+					return;
+				}else if (curMenuIndex == 2) 
+				{
+					curMenuIndex = 0;
+					fl.setBackgroundResource(getResources().getColor(
+							R.color.transparent_background));
+					tView2.setBackgroundResource(R.drawable.channel_focus);
+
+				/*	rl.setMargins(0, Method.getScaleY(340), 0, 0);
+					rl.gravity = Gravity.RIGHT;
+					fl.setLayoutParams(rl);*/
 					return;
 				}
 			}
 			return;
 		}
-		
-		
+
+
+		Log.i("MARK","curMenuIndex=="+curMenuIndex);
 
 		if (curMenuIndex == 0) {
-			curMenuIndex = 1;
+			curMenuIndex = 2;
+
+			tView2.setBackgroundResource(getResources().getColor(
+					R.color.transparent_background));
+			fl.setBackgroundResource(R.drawable.channel_focus);
+
+			/*rl.setMargins(0, Method.getScaleY(238), 0, 0);
+			rl.gravity = Gravity.RIGHT;
+			fl.setLayoutParams(rl);*/
+			return;
+		}
+
+		if (curMenuIndex == 2) {
+			curMenuIndex = 0;
+
 			fl.setBackgroundResource(getResources().getColor(
 					R.color.transparent_background));
 			tView2.setBackgroundResource(R.drawable.channel_focus);
 
-			rl.setMargins(0, Method.getScaleY(238), 0, 0);
+		/*	rl.setMargins(0, Method.getScaleY(340), 0, 0);
 			rl.gravity = Gravity.RIGHT;
-			fl.setLayoutParams(rl);
-			return;
-		}
-
-		if (curMenuIndex == 1) {
-			curMenuIndex = 0;
-			fl.setBackgroundResource(R.drawable.channel_focus);
-			tView2.setBackgroundResource(getResources().getColor(R.color.transparent_background));
-
-			rl.setMargins(0, Method.getScaleY(340), 0, 0);
-			rl.gravity = Gravity.RIGHT;
-			fl.setLayoutParams(rl);
+			fl.setLayoutParams(rl);*/
 			return;
 		}
 	}
@@ -1579,7 +1833,15 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		String startDateTime = formatter.format(nowdate);
 		System.out.println("############:Date:"+startDateTime);
 		Schedule[] res = ScheduleCache.getSchedule(curPlayingChannel.getContentId(), startDateTime);
-		if (res != null) 
+		try{
+			Log.i("MARK"," dealResWithSchedules  res[0]=="+res[0].getProgramName());
+			Log.i("MARK"," dealResWithSchedules  res[1]=="+res[1].getProgramName());
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+
+		}
+		if (res != null)
 		{
 			setScheduleInfo(res);
 		}
@@ -2397,7 +2659,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		tv_channel_name.setTag(curPlayingChannel.getContentId());
 		tv_chanale_playing.setText("");
 		tv_channel_will_play.setText("");
-		
+		Log.i("MARK","updateChannelViewInfo dealSchedule");
 		dealSchedule();
 	}
 
@@ -2409,18 +2671,24 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	  */
 	private void dealSchedule() 
 	{
+
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		Calendar calendar = Calendar.getInstance();
 		Date nowdate = calendar.getTime();
 		String startDateTime = formatter.format(nowdate);
+		Log.i("MARK"," dealSchedule startDateTime=="+startDateTime);
 		System.out.println("############:Date:"+startDateTime);
 //		Schedule[] res = ScheduleCache.getSchedule(curPlayingChannel.getContentId(), startDateTime);
+
 		Schedule[] res = DataModel.getInstance().getSchedule(curPlayingChannel.getContentId(),startDateTime);
-		if (res == null) 
+		Log.i("MARK"," dealSchedule res=="+res);
+		if (res == null)
 		{
+			Log.i("MARK"," dealSchedule res == null");
 //			postGetCurScheduleList(curPlayingChannel.getContentId());//向服务器请求该频道当天的全部节目单
 //			postGetScheduleList(curPlayingChannel.getContentId()); //向服务器请求该频道12小时内的节目单
 		}else {
+			Log.i("MARK"," dealSchedule setScheduleInfo");
 			setScheduleInfo(res);
 		}
 	}
@@ -2433,6 +2701,14 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 	  */
 	private void setScheduleInfo(Schedule[] res) 
 	{
+		try{
+			Log.i("MARK"," setScheduleInfo  res[0]=="+res[0].getProgramName());
+			Log.i("MARK"," setScheduleInfo  res[1]=="+res[1].getProgramName());
+		}catch (Exception e){
+			e.printStackTrace();
+		}finally {
+
+		}
 		StringBuffer sBuffer = new StringBuffer();
 		if (!res[0].getProgramName().equals("none")) 
 		{
@@ -2442,7 +2718,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 			sBuffer.append("  " + res[0].getProgramName());
 			tv_chanale_playing.setText(sBuffer.toString());
 		}
-		
+
 		if (!res[1].getProgramName().equals("none")) 
 		{
 			String info2 = res[1].getStartTime();
@@ -3201,7 +3477,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 					timeKeyDownRecent = Calendar.getInstance().getTimeInMillis();
 				}else if (res.getCode().equals("51000-2"))//51A00-2 --> 51000-2
 				{//the channel need to buy
-					UIUtils.showToast("试看结束，请订购观看");
+					showToast("试看结束，请订购观看");
 					GDHttpTools.getInstance().setNeedReplay(false);//不准重新播放，直到订购成功
 
 					if (surfaceView!= null) {
@@ -3309,7 +3585,7 @@ public class FragmentLivePlayBase extends FragmentBase implements IUpdateData,IF
 		@Override
 		public void onCountDownStart()
 		{
-			UIUtils.showToast("该频道为VIP频道");
+			showToast("该频道为VIP频道");
 		}
 
 		@Override

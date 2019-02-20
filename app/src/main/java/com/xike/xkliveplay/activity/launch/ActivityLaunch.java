@@ -163,6 +163,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
     private INetStatusChanged iChange = new INetStatusChanged() {
         @Override
         public void onNetStatusChange(boolean isConnected) {
+            Log.i("MARK","onNetStatusChange isConnected=="+isConnected+"  curFragment=="+curFragment);
             if (curFragment == null) {
                 //		    	readDefault();
                 //首先要赋值tag，也就是需要进行getAIDL访问

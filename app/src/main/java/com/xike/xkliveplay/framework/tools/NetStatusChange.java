@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 
 import com.xike.xkliveplay.framework.error.ErrorBroadcastAction;
 import com.xike.xkliveplay.framework.error.SendBroadcastTools;
@@ -74,8 +75,10 @@ public class NetStatusChange
 		@Override
 		public void onReceive(Context context, Intent intent) 
 		{
+			Log.i("MARK"," connReceiver onReceive intent=="+intent);
 			if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) 
 			{
+				Log.i("MARK"," connReceiver onReceive isNetworkConnected=="+isNetworkConnected(context));
 				if (!isNetworkConnected(context)) 
 				 {
 					 SendBroadcastTools.sendErrorBroadcast(context, ErrorBroadcastAction.ERROR_INTERNET_ACTION,"","");

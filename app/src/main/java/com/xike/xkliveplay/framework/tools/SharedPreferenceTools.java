@@ -18,8 +18,9 @@ public class SharedPreferenceTools
 	public static final String SHARED_FILE_LIVEPLAY = "liveplay";
 	
 	public static final String SHARED_KEY_VERSION = "key_version";
-	
-	
+
+	public static final String SHARED_KEY_RECOMMEND = "key_recommend";
+
 	/**
 	 * 
 	 * function:从指定的sharedpreference中读取String类型数据 

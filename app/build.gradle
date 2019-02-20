@@ -3,17 +3,41 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 19
     buildToolsVersion "27.0.3"
-
     defaultConfig {
         applicationId "com.xike.xkliveplay"
         minSdkVersion 11
         targetSdkVersion 15
+        versionCode 127
+        versionName "CM-v1.2.7"
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    //打包后应用名称
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+
+                if ((variant.buildType.name).equals('release')) {
+                    //fileName = "RELEASE${defaultConfig.versionName}.${getTime()}.apk"
+                   // fileName = android.compileSdkVersion+"HaiKanLive.apk"
+                    outputFileName="HK_ShanDongLive_Uni_"+versionName+"_Release.apk"
+
+
+                } else if ((variant.buildType.name).equals('debug')) {
+                   // fileName = android.compileSdkVersion+"HaiKanLive_debug.apk"
+                     outputFileName="HK_ShanDongLive_Uni_"+versionName+"_Debug.apk"
+
+                }
+             }
+
         }
     }
 }
@@ -47,6 +71,8 @@ dependencies {
 
 
 
+
 def getLayoutLibPath() {
     return "${android.getSdkDirectory().getAbsolutePath()}" + "/platforms/" + android.compileSdkVersion + "/data/layoutlib.jar"
+
 }

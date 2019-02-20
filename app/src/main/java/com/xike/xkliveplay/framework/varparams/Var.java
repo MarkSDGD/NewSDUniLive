@@ -30,13 +30,15 @@ public class Var {
 	
 	public static final String Category_Save = "save";
 	public static final String Category_Recent = "recent";
-	public  static final int vipTryPlayLength = 5;//试看定为90s
+	public  static final int vipTryPlayLength = 90;//试看定为90s
 	public static final int INIT_OK = 1;
 	public static final int INIT_FAILED = 2;
 	
 	private final static String TIME = "Time";
 
-	
+	//是否启用容灾
+	public static boolean isRongZaiEnabled = false;
+
 	/** 所有频道**/
 	public static List<ContentChannel> allChannels = new ArrayList<ContentChannel>();
 	/** 所有类别**/

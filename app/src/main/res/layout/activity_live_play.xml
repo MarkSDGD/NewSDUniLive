@@ -121,16 +121,34 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@color/black_80"
+            android:gravity="center"
             android:orientation="vertical" >
-
+            <TextView
+                android:id="@+id/tv_back"
+                android:layout_width="@dimen/px_214"
+                android:layout_height="@dimen/px_72"
+                android:gravity="center"
+                android:text="回        看"
+                android:textColor="@color/white"
+                android:textSize="@dimen/menu_text_size" />
+            <TextView
+                android:id="@+id/tv_order_history"
+                android:layout_width="@dimen/px_214"
+                android:visibility="gone"
+                android:layout_height="@dimen/px_72"
+                android:layout_marginTop="@dimen/px_30"
+                android:gravity="center"
+                android:text="订购记录"
+                android:textColor="@color/white"
+                android:textSize="@dimen/menu_text_size" />
             <FrameLayout
                 android:id="@+id/fl_save"
                 android:layout_width="@dimen/px_214"
                 android:layout_height="@dimen/px_72"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/px_350"
-                android:background="@drawable/channel_focus" >
 
+                android:layout_marginTop="@dimen/px_30"
+                android:background="@drawable/channel_focus" >
                 <TextView
                     android:id="@+id/tv_save"
                     android:layout_width="@dimen/px_214"
@@ -153,25 +171,7 @@
                     android:textSize="@dimen/menu_text_size" />
             </FrameLayout>
 
-            <TextView
-                android:id="@+id/tv_back"
-                android:layout_width="@dimen/px_214"
-                android:layout_height="@dimen/px_72"
-                android:layout_marginTop="@dimen/px_30"
-                android:gravity="center"
-                android:text="回        看"
-                android:textColor="@color/white"
-                android:textSize="@dimen/menu_text_size" />
-            <TextView
-                android:id="@+id/tv_order_history"
-                android:layout_width="@dimen/px_214"
-                android:visibility="gone"
-                android:layout_height="@dimen/px_72"
-                android:layout_marginTop="@dimen/px_30"
-                android:gravity="center"
-                android:text="订购记录"
-                android:textColor="@color/white"
-                android:textSize="@dimen/menu_text_size" />
+
         </LinearLayout>
     </RelativeLayout>
 

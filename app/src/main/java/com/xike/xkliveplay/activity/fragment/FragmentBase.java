@@ -207,4 +207,6 @@ public class FragmentBase extends Fragment
 	public void stopCountDownOrdismissOrderDialog(){
 
 	}
+
+
 }
