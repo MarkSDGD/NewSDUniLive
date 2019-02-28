@@ -333,7 +333,7 @@ public class ArcPlayControl implements IPlayerStateListener{
 		bPrepared = false;
 		if(videoView != null)
 		{
-			videoView.stopPlayback();
+			videoView.stop();
 			videoView  = null;
 		}
 	}

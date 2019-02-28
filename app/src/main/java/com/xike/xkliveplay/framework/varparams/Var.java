@@ -35,7 +35,7 @@ public class Var {
 	public static final int INIT_FAILED = 2;
 	
 	private final static String TIME = "Time";
-
+	public static boolean hasCalledBeginStart = false;
 	//是否启用容灾
 	public static boolean isRongZaiEnabled = false;
 

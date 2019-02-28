@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
-public class UniApplication extends MultiDexApplication {
+public class BaseApplication extends MultiDexApplication {
 
     //以下属性应用于整个应用程序，合理利用资源，减少资源浪费
     private static Context mContext;//上下文
@@ -25,6 +25,7 @@ public class UniApplication extends MultiDexApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
 
         //对全局属性赋值
         mContext = getApplicationContext();
@@ -48,7 +49,7 @@ public class UniApplication extends MultiDexApplication {
     }
 
     public static void setContext(Context mContext) {
-        UniApplication.mContext = mContext;
+        BaseApplication.mContext = mContext;
     }
 
     public static Thread getMainThread() {
@@ -56,7 +57,7 @@ public class UniApplication extends MultiDexApplication {
     }
 
     public static void setMainThread(Thread mMainThread) {
-        UniApplication.mMainThread = mMainThread;
+        BaseApplication.mMainThread = mMainThread;
     }
 
     public static long getMainThreadId() {
@@ -64,7 +65,7 @@ public class UniApplication extends MultiDexApplication {
     }
 
     public static void setMainThreadId(long mMainThreadId) {
-        UniApplication.mMainThreadId = mMainThreadId;
+        BaseApplication.mMainThreadId = mMainThreadId;
     }
 
     public static Looper getMainThreadLooper() {
@@ -72,7 +73,7 @@ public class UniApplication extends MultiDexApplication {
     }
 
     public static void setMainThreadLooper(Looper mMainLooper) {
-        UniApplication.mMainLooper = mMainLooper;
+        BaseApplication.mMainLooper = mMainLooper;
     }
 
     public static Handler getMainHandler() {
@@ -80,6 +81,6 @@ public class UniApplication extends MultiDexApplication {
     }
 
     public static void setMainHandler(Handler mHandler) {
-        UniApplication.mHandler = mHandler;
+        BaseApplication.mHandler = mHandler;
     }
 }

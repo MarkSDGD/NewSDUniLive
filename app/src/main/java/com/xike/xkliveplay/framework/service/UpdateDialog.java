@@ -11,18 +11,6 @@
  */
 package com.xike.xkliveplay.framework.service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +27,18 @@ import com.xike.xkliveplay.R;
 import com.xike.xkliveplay.framework.entity.LiveUpgrageResponse;
 import com.xike.xkliveplay.framework.tools.APKTools;
 import com.xike.xkliveplay.framework.varparams.Var;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @ClassName: UpdateDialog
@@ -120,60 +120,70 @@ public class UpdateDialog extends Dialog
 			update();
 		}
 	};
-	
-	public void downFile(final String url) 
+
+	public void downFile(final String url)
 	{
-    new Thread() {
-		public void run() 
-		{
-			System.out.println("###下载升级APK开始");
-            HttpClient client = new DefaultHttpClient();
-            HttpGet get = new HttpGet(url);
-            HttpResponse response;
-            try {
-                response = client.execute(get);
-                HttpEntity entity = response.getEntity();
-                long length = entity.getContentLength();
-//                Message msg = Message.obtain();
-//                msg.arg1 = (int)length;
-//                msg.what = MSG_UPDATE_INIT_PROGRESSBAR;
-//                handler.sendMessage(msg);
-                InputStream is = entity.getContent();
-                FileOutputStream fileOutputStream = null;
-                if (is != null) {
-                    @SuppressWarnings("unused")
-					File file = new File(downloadApkPath);
-                    fileOutputStream = getContext().openFileOutput("xklive.apk", Context.MODE_WORLD_READABLE);
-                    byte[] buf = new byte[1024];
-                    int ch = -1;
-                    int count = 0;
-                    while ((ch = is.read(buf)) != -1) {
-                        fileOutputStream.write(buf, 0, ch);
-                        count += ch;
-//                        msg = Message.obtain();
-//                        msg.arg1 = count;
-//                        msg.what = MSG_UPDATE_PROGRESS_UPDATE;
-//                        handler.sendMessage(msg);
-                        if (length > 0) {
-                        }
-                    }
-                }
-                fileOutputStream.flush();
-                if (fileOutputStream != null) {
-                    fileOutputStream.close();
-                }
-                System.out.println("###升级APK下载完成");
-                handler.sendEmptyMessage(0);
-            } catch (ClientProtocolException e) 
-            {
-                e.printStackTrace();
-            } catch (IOException e) 
-            {
-                e.printStackTrace();
-            }
-        }
-    }.start();
-}
+		new Thread() {
+			public void run()
+			{
+				System.out.println("###下载升级APK开始");
+				HttpClient client = new DefaultHttpClient();
+				HttpGet get = new HttpGet(url);
+				HttpResponse response;
+				try {
+					response = client.execute(get);
+					System.out.println("###response code:" + response.getStatusLine().getStatusCode());
+					if (response.getStatusLine().getStatusCode() == 200) {
+						HttpEntity entity = response.getEntity();
+						long length = entity.getContentLength();
+						//                Message msg = Message.obtain();
+						//                msg.arg1 = (int)length;
+						//                msg.what = MSG_UPDATE_INIT_PROGRESSBAR;
+						//                handler.sendMessage(msg);
+						InputStream is = entity.getContent();
+						FileOutputStream fileOutputStream = null;
+						if (is != null) {
+							@SuppressWarnings("unused")
+							File file = new File(downloadApkPath);
+							fileOutputStream = getContext().openFileOutput("xklive.apk", Context.MODE_WORLD_READABLE);
+							byte[] buf = new byte[1024];
+							int ch = -1;
+							int count = 0;
+							while ((ch = is.read(buf)) != -1) {
+								fileOutputStream.write(buf, 0, ch);
+								count += ch;
+
+								//                        msg = Message.obtain();
+								//                        msg.arg1 = count;
+								//                        msg.what = MSG_UPDATE_PROGRESS_UPDATE;
+								//                        handler.sendMessage(msg);
+								if (count > length) {
+									break;
+								}
+							}
+						}
+						fileOutputStream.flush();
+						if (fileOutputStream != null) {
+							fileOutputStream.close();
+						}
+						//关闭一下输入流
+						if (is != null) {
+							is.close();
+						}
+						System.out.println("###升级APK下载完成");
+						handler.sendEmptyMessage(0);
+					}
+
+				} catch (ClientProtocolException e)
+				{
+					e.printStackTrace();
+				} catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}.start();
+	}
 	private int i = 0;
 	
 	public void stop()
@@ -190,6 +200,12 @@ public class UpdateDialog extends Dialog
 			if (msg.what == 0) 
 			{
 				if (ctx == null) return;
+				//这里是要不弹框，等apk也校验通过，才弹出
+				if (!APKTools.isAPKComplete(ctx, downloadApkPath))
+				{
+					System.out.println("###APK下载不完整");
+					return;
+				}
 				if (Var.isActivityLaunched) 
 				{
 					show();
@@ -202,12 +218,12 @@ public class UpdateDialog extends Dialog
 	public void update() 
 	{
 		dismiss();
-		if (ctx == null) return;
+		/*if (ctx == null) return;
 		if (!APKTools.isAPKComplete(ctx, downloadApkPath)) 
 		{
 			return;
 		}
-		
+		*/
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.fromFile(new File(downloadApkPath)),
                 "application/vnd.android.package-archive");

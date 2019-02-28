@@ -7,7 +7,7 @@ android {
         applicationId "com.xike.xkliveplay"
         minSdkVersion 11
         targetSdkVersion 15
-        versionCode 300
+        versionCode 1262
         versionName "CM-v3.0.0"
     }
 
@@ -55,7 +55,7 @@ dependencies {
     api files('libs/umeng-analytics-v5.6.1.jar')
     api files('libs/XiriFeedback.jar')
     api files('libs/XiriScene.jar')
-    api files('libs/shandongSDK_V1.3.39.jar')
+    api files('libs/shandongSDK_V1.3.41.jar')
     api files('libs/ArcPlayer.jar')
 //    api files('libs/shandongSDK_V1.2_2018081601.jar')
     api 'com.orhanobut:hawk:2.0.1'
@@ -67,6 +67,7 @@ dependencies {
     api 'jp.wasabeef:glide-transformations:2.0.2'
     implementation 'com.android.support:multidex:1.0.3'
     compileOnly files(getLayoutLibPath())
+
 }
 
 

@@ -11,6 +11,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -38,6 +39,7 @@ import com.iflytek.xiri.scene.ISceneListener;
 import com.iflytek.xiri.scene.Scene;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
+import com.mernake.framework.tools.MernakeSharedTools;
 import com.umeng.analytics.MobclickAgent;
 import com.xike.xkliveplay.R;
 import com.xike.xkliveplay.activity.fragment.FragmentBackPlayBase;
@@ -53,6 +55,7 @@ import com.xike.xkliveplay.framework.entity.Category;
 import com.xike.xkliveplay.framework.entity.ContentChannel;
 import com.xike.xkliveplay.framework.entity.GetAccountInfoRes;
 import com.xike.xkliveplay.framework.entity.LiveUpgrageResponse;
+import com.xike.xkliveplay.framework.entity.gd.GDAuthAidlRes;
 import com.xike.xkliveplay.framework.error.ErrorBroadcastAction;
 import com.xike.xkliveplay.framework.error.SendBroadcastTools;
 import com.xike.xkliveplay.framework.http.HttpUtil;
@@ -61,6 +64,7 @@ import com.xike.xkliveplay.framework.httpclient.VarParam;
 import com.xike.xkliveplay.framework.tools.APKTools;
 import com.xike.xkliveplay.framework.tools.AuthTools;
 import com.xike.xkliveplay.framework.tools.GetStbinfo;
+import com.xike.xkliveplay.framework.tools.GlideCacheUtil;
 import com.xike.xkliveplay.framework.tools.LogUtil;
 import com.xike.xkliveplay.framework.tools.MernakeLogTools;
 import com.xike.xkliveplay.framework.tools.MessageType;
@@ -94,6 +98,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -214,7 +219,7 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
     @Override
     protected void onResume() {
         super.onResume();
-        NetStatusChange.getInstance().reg(this);
+
         MobclickAgent.onResume(this);
     }
 
@@ -280,8 +285,35 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
         initAnimation(); // Init cache animation.
         initP2P(); //Init p2p settings.
         initCurType();
+        clearCache();
         Method.getScreenHeight(this);
         Method.getScreenWidth(this);
+    }
+
+    private void clearCache() {
+
+        SharedPreferences sp = getSharedPreferences("FragmentLivePlay", 0);
+        long lastcleartimestamp = sp.getLong("lastcleartimestamp", System.currentTimeMillis());
+        long cacheSizes = GlideCacheUtil.getInstance().getCacheSizeInBytes(ActivityLaunchBase.this,null);
+        int days = (int) ((System.currentTimeMillis() - lastcleartimestamp)/(1000 * 60 * 60 * 24));
+        if (days>=0.001) {
+            LogUtil.i("MARK", "clearCache", "超过30天删除");
+            GlideCacheUtil.getInstance().clearCacheDiskSelf(ActivityLaunchBase.this);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putLong("lastcleartimestamp", System.currentTimeMillis());
+            editor.apply();
+            LogUtil.i("MARK", "clearCache", "set lastcleartimestamp== " + sp.getLong("lastcleartimestamp", 0));
+         }else if(cacheSizes >= 100*1024*1024){
+            LogUtil.i("MARK", "clearCache", "缓存大小超过100M删除");
+            GlideCacheUtil.getInstance().clearCacheDiskSelf(ActivityLaunchBase.this);
+            SharedPreferences.Editor editor = sp.edit();
+            editor.putLong("lastcleartimestamp", System.currentTimeMillis());
+            editor.apply();
+            LogUtil.i("MARK", "clearCache", "set lastcleartimestamp== " + sp.getLong("lastcleartimestamp", 0));
+         }
+
+
+
     }
 
 
@@ -887,6 +919,7 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
     }
 
     public void jumpToFragment() {
+        Log.i("MARK", "ActivityLaunchBase jumpToFragment ");
         if (Var.allCategorys.size() == 0 || Var.allChannels.size() == 0) {
             LogUtil.e(tag, "jumpToFragment:", "Categories size is 0 or Channels size is 0!");
             return;
@@ -1565,7 +1598,7 @@ public class ActivityLaunchBase extends FragmentActivity implements IUpdateData,
     @Override
     protected void onStop() {
         super.onStop();
-        NetStatusChange.getInstance().unReg(this);
+
         //		System.out.println("###直播APK退出### 网信退出APK函数的返回值是： " + Common.closeApk());
     }
 

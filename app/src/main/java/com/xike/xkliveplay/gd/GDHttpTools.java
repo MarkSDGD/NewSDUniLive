@@ -13,6 +13,7 @@ package com.xike.xkliveplay.gd;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -21,6 +22,7 @@ import com.shandong.sdk.shandongsdk.bean.CMHwAuthReturn;
 import com.shandong.sdk.shandongsdk.bean.LiveRecommendData;
 import com.shandong.sdk.shandongsdk.way.SDKMethods;
 import com.shandong.shandonglive.zengzhi.ui.ZZFileTools;
+import com.xike.xkliveplay.activity.BaseApplication;
 import com.xike.xkliveplay.framework.entity.Category;
 import com.xike.xkliveplay.framework.entity.ContentChannel;
 import com.xike.xkliveplay.framework.entity.GetContentList;
@@ -50,6 +52,7 @@ import com.xike.xkliveplay.framework.httpclient.HttpAll6Schedules;
 import com.xike.xkliveplay.framework.httpclient.HttpGetCategoryList;
 import com.xike.xkliveplay.framework.httpclient.HttpGetContentList;
 import com.xike.xkliveplay.framework.httpclient.HttpGetScheduleList;
+import com.xike.xkliveplay.framework.tools.LogUtil;
 import com.xike.xkliveplay.framework.varparams.Var;
 
 import java.util.ArrayList;
@@ -207,6 +210,7 @@ public class GDHttpTools
 		{
 			showLog("初始化广电SDK");
 			SDKMethods.init(context,"0");
+			SDKMethods.setUni();  //1.3.41 版本区分单播
 //			setPlatformTag(context);
 		}
 	}
@@ -1096,6 +1100,16 @@ public class GDHttpTools
 					//TODO 解析xml
 					HttpAll6Schedules httpAll6Schedules = new HttpAll6Schedules(null);
 					List<Schedule> list = httpAll6Schedules.parser(str);
+
+					//add timestamp
+					if (list != null && list.size() > 0) {
+						SharedPreferences sp = BaseApplication.getContext().getSharedPreferences("FragmentLivePlay", 0);
+						SharedPreferences.Editor editor = sp.edit();
+						editor.putLong("scheduletimestamp", System.currentTimeMillis());
+						editor.putString("scheduleXMLStr", str);
+						editor.apply();
+						LogUtil.i("MARK", "setScheduleInfo", "scheduletimestamp== " + sp.getLong("scheduletimestamp", 0));
+					}
 					DataModel.getInstance().initAll6Schedules(list);
 					if (iUpdateData!=null)iUpdateData.updateData(METHOD_GETLIVESCHEDULEALLLIST,"","",true);
 				}

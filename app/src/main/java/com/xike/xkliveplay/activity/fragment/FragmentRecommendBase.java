@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arcsoft.media.ArcPlayer;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.Gson;
 import com.mernake.framework.tools.MernakeSharedTools;
 import com.shandong.sdk.shandongsdk.bean.LiveRecommendData;
@@ -29,6 +31,7 @@ import com.shandong.sdk.shandongsdk.bean.LiveRecommendDataData;
 import com.shandong.shandonglive.recommend.focus.EffectNoDrawBridge;
 import com.shandong.shandonglive.recommend.focus.MainUpView;
 import com.xike.xkliveplay.R;
+import com.xike.xkliveplay.activity.BaseApplication;
 import com.xike.xkliveplay.activity.LaunchType;
 import com.xike.xkliveplay.framework.arcplay.ArcPlayControl;
 import com.xike.xkliveplay.framework.arcplay.ArcSurfaceView;
@@ -38,11 +41,13 @@ import com.xike.xkliveplay.framework.entity.ContentChannel;
 import com.xike.xkliveplay.framework.http.IUpdateData;
 import com.xike.xkliveplay.framework.httpclient.DataModel;
 import com.xike.xkliveplay.framework.tools.AbStrUtil;
-import com.xike.xkliveplay.framework.tools.ImageUtils;
 import com.xike.xkliveplay.framework.tools.LogUtil;
 import com.xike.xkliveplay.framework.tools.SharedPreferenceTools;
+import com.xike.xkliveplay.framework.tools.UIUtils;
 import com.xike.xkliveplay.framework.varparams.Var;
 import com.xike.xkliveplay.gd.GDHttpTools;
+import com.xike.xkliveplay.gd.LogUtils;
+import com.xike.xkliveplay.xunfei.XunfeiTools;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -60,7 +65,7 @@ import java.util.TimerTask;
  * <b>Method:</b> <br>
  */
 @SuppressLint("ValidFragment")
-public class FragmentRecommendBase extends FragmentBase implements View.OnClickListener, IPlayerStateListener {
+public class FragmentRecommendBase extends FragmentBase implements View.OnClickListener, IPlayerStateListener, XunfeiTools.XunfeiInterface {
     public IFragmentJump iFragmentJump = null;
     private Context mContext;
     private View curView;
@@ -171,8 +176,9 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     public void onCreate(Bundle savedInstanceState) {
         LogUtil.e("MARK", "onCreate", "STARTING");
         super.onCreate(savedInstanceState);
-        MernakeSharedTools.set(getActivity(), "isLiveStarted", true);
-        mContext = getActivity().getApplicationContext();
+        mContext = BaseApplication.getContext();
+        MernakeSharedTools.set(mContext, "isLiveStarted", true);
+
     }
 
     @Override
@@ -224,6 +230,7 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         curView = inflater.inflate(R.layout.activity_recommend, container, false);
+        XunfeiTools.getInstance().setInterface(this);
         instanse = "Recommend";
         //初始化控件
         initView();
@@ -342,17 +349,22 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
                     if (recommendDataList != null && recommendDataList.size() >= 12) {
                         setData();
                     }
-                } else if (!isSuccess) {
+                } else if (!isSuccess && method.equals(GDHttpTools.METHOD_GETRECOMMENDDATA)) {
                     String recommendJson = SharedPreferenceTools.getSavedStringPreference(mContext, SharedPreferenceTools.SHARED_KEY_RECOMMEND, SharedPreferenceTools.SHARED_FILE_LIVEPLAY);
+                    Log.i("MARK","getData  updateData: isSuccess==false  recommendJson==" + recommendJson);
+
                     if("".equals(recommendJson)){
-                        Toast.makeText(getActivity(), "首页数据获取失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "首页数据获取失败", Toast.LENGTH_SHORT).show();
 
                     }else{
-                        Toast.makeText(getActivity(), "获取缓存的首页数据", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "获取缓存的首页数据", Toast.LENGTH_SHORT).show();
                         LiveRecommendData recommendData = new Gson().fromJson(recommendJson,LiveRecommendData.class);
                         recommendDataList = recommendData.getData();
+                        Log.i("MARK","getData  updateData: isSuccess==false  recommendDataList==" + recommendDataList);
+
                         //加载数据
                         if (recommendDataList != null && recommendDataList.size() >= 12) {
+
                             setData();
                         }
                     }
@@ -364,6 +376,8 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
 
     //加载数据
     private void setData() {
+        Log.i("MARK","setData()");
+
         for (int i = 0; i < recommendDataList.size(); i++) {
             if (i == 0) {//视频框
                 handler.sendEmptyMessageDelayed(3, 100);
@@ -375,13 +389,11 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
             } else {
                 //图片
                 if (recommendDataList.get(i).getImgUrl() != null && imageViews.length > i - 1) {
-                    Log.i("MARK","****** name:" + getActivity().getClass().getName());
-
 
                     if (i == 8) {
-                        ImageUtils.setImage(recommendDataList.get(i).getImgUrl(), getActivity(), imageViews[i - 1], R.drawable.zhan_529_733_ico, getActivity().getClass().getName());
+                         setImage(recommendDataList.get(i).getImgUrl(), mContext, imageViews[i - 1], R.drawable.zhan_529_733_ico );
                     } else {
-                        ImageUtils.setImage(recommendDataList.get(i).getImgUrl(), getActivity(), imageViews[i - 1], R.drawable.zhan_380_280_horzition, getActivity().getClass().getName());
+                         setImage(recommendDataList.get(i).getImgUrl(), mContext, imageViews[i - 1], R.drawable.zhan_380_280_horzition );
                     }
                 }
                 //文字
@@ -394,8 +406,20 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
                 }
             }
         }
+
+
     }
 
+    private void setImage(final String url, final Context context, final ImageView imageView, final int placeholder){
+        LogUtil.i("MARK", "setImage", "context=="+context+" url=="+url);
+
+        Glide.with(context)
+                .load(url)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .placeholder(placeholder)
+                .error(placeholder)
+                .into(imageView);
+    }
     /*private void playVideo(ContentChannel playChannel)
     {
         LogUtil.i("xumin","playVideo","******playChannel.getPlayURL():" + playChannel.getPlayURL());
@@ -510,7 +534,8 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     public boolean onkeyDownReturn() {
         Log.e("MARK", "onkeyDownReturn: FragmentRecommendBase keyCode back");
         if ((System.currentTimeMillis() - exitTime) > 2000) {
-            Toast.makeText(getActivity(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            UIUtils.showToast("再按一次退出程序");
+           // Toast.makeText(mContext, "再按一次退出程序", Toast.LENGTH_SHORT).show();
             exitTime = System.currentTimeMillis();
         } else {
             System.exit(0);
@@ -523,36 +548,40 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
         Log.e("MARK", "onClick: 触发点击");
         if (v.getId() == R.id.videoView) {
             recommendIntent(0);
-        } else if (v.getId() == R.id.item_1) {
+        } else if (v.getId() == R.id.item_1) { //电视频道
             recommendIntent(1);
-        } else if (v.getId() == R.id.item_2) {
+        } else if (v.getId() == R.id.item_2) { //回看
             recommendIntent(2);
-        } else if (v.getId() == R.id.item_3) {
+        } else if (v.getId() == R.id.item_3) { //高清
             recommendIntent(3);
-        } else if (v.getId() == R.id.item_4) {
+        } else if (v.getId() == R.id.item_4) { //央视
             recommendIntent(4);
-        } else if (v.getId() == R.id.item_5) {
+        } else if (v.getId() == R.id.item_5) { // 本地
             recommendIntent(5);
-        } else if (v.getId() == R.id.item_6) {
+        } else if (v.getId() == R.id.item_6) { // 卫视
             recommendIntent(6);
-        } else if (v.getId() == R.id.item_7) {
+        } else if (v.getId() == R.id.item_7) { //少儿
             recommendIntent(7);
-        } else if (v.getId() == R.id.item_8) {
+        } else if (v.getId() == R.id.item_8) { // 特色
             recommendIntent(8);
-        } else if (v.getId() == R.id.item_9) {
+        } else if (v.getId() == R.id.item_9) { //海看大片
             recommendIntent(9);
-        } else if (v.getId() == R.id.item_10) {
+        } else if (v.getId() == R.id.item_10) {  //DC 联盟
             recommendIntent(10);
         }
     }
 
     //推荐位跳转
     public void recommendIntent(int num) {
+        LogUtil.i("MARK", "recommendIntent", "num=="+num+" recommendDataList=="+recommendDataList);
+        if(recommendDataList==null){
+         UIUtils.showToast("数据异常，请退出重试！");
+        }
         if (recommendDataList.size() > num) {
             //存下焦点位置
             Bundle bundle = new Bundle();
             //跳转判断
-            Log.e("MARK", "recommendIntent: 跳转类型 = " + recommendDataList.get(num).getType());
+            Log.e("MARK", "recommendIntent  num== "+num+"  跳转类型 = " + recommendDataList.get(num).getType());
             if (recommendDataList.get(num).getType() != null && recommendDataList.get(num).getType().equals("live")) {//直播
                 jumpChannelNum = recommendDataList.get(num).getContentId();
                 jumpCategoryId = recommendDataList.get(num).getCategoryId();
@@ -608,6 +637,7 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
                 bundle.putInt("index", index);
                 bundle.putBoolean("first", true);
                 bundle.putInt("lastLaunchType", curLaunchType);//将首页这个fragment作为上个fragment传给直播
+                Log.e("MARK", "recommendIntent index=="+index+"  curLaunchType=="+curLaunchType);
                 iFragmentJump.jumpToFragmentWithBundles(LaunchType.TYPE_LIVE, index, bundle);
             } else if (recommendDataList.get(num).getType() != null && recommendDataList.get(num).getType().equals("rePlay")) {//回看
                 Log.e("MARK", "recommendIntent: 跳转回看");
@@ -626,13 +656,13 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
                 iFragmentJump.jumpToVod(bundle);
             }
         } else {
-            Toast.makeText(getActivity(), "数据获取错误，跳转失败。", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "数据获取错误，跳转失败。", Toast.LENGTH_SHORT).show();
         }
     }
 
     //保存频道信息
     private void saveChannelInfo(String name) {
-        SharedPreferences sp = getActivity().getSharedPreferences("FragmentLivePlay", 0);
+        SharedPreferences sp = mContext.getSharedPreferences("FragmentLivePlay", 0);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString("name", name);
         editor.commit();
@@ -641,6 +671,118 @@ public class FragmentRecommendBase extends FragmentBase implements View.OnClickL
     @Override
     public void onPlayerStateChanged(int state, int what, int extra) {
         //首页播放，目前不需要做任何事情，只是备用的
+    }
+
+  //讯飞语音相关
+
+    @Override
+    public void goToNextChannel() {
+    }
+
+    @Override
+    public void goToLastChannel() {
+    }
+
+    @Override
+    public void goToLive() {
+        jumpToLive();
+    }
+
+    @Override
+    public void jumpToLive() {
+        LogUtils.i("xumin", "jumpToLive");
+        if (arcPlayControl != null) {
+            arcPlayControl.stop();
+            arcPlayControl = null;
+        }
+        //这里需要改成跳转到直播
+        iFragmentJump.jumpToFramgment(LaunchType.TYPE_LIVE, 0);
+        isJumpTo = true;
+    }
+
+    @Override
+    public void goToChannel(String num, String channelName) {
+        LogUtils.i("xumin", "FragmentRecommendBase goToChannel num: " + num  + "channelName: " + channelName);
+        jumpChannelNum = num;
+        for (ContentChannel channel : Var.allChannels)
+        {
+            String channel2="";
+            String channel3="";
+
+            if (channel.getChannelNumber()!=null && channel.getChannelNumber().length()==1)
+            {
+                channel2 = "0"+channel.getChannelNumber();
+                channel3 = "00"+channel.getChannelNumber();
+            }else if (channel.getChannelNumber()!=null && channel.getChannelNumber().length() ==2)
+            {
+                channel3 = "0"+channel.getChannelNumber();
+            }
+
+            //这种情况不能匹配到jumpchannelNum是小于3位的情况，比如jumpchanellNum是30，而频道列表里边是030，就无法匹配到
+            if (channel.getChannelNumber().equals(jumpChannelNum)||channel2.equals(jumpChannelNum)||channel3.equals(jumpChannelNum))
+            {
+                saveChannelInfo(channel.getName());
+                if (arcPlayControl != null) {
+                    arcPlayControl.stop();
+                    arcPlayControl = null;
+                }
+                iFragmentJump.jumpToFramgment(LaunchType.TYPE_LIVE, 0);
+                isJumpTo = true;
+                return;
+            }
+
+            //所以这里要加反向匹配
+            String jumpString2 = "";
+            String jumpString3 = "";
+            if (jumpChannelNum.length() == 1){
+                jumpString2 = "0"+jumpChannelNum;
+                jumpString3 = "00" + jumpChannelNum;
+            }else if (jumpChannelNum.length() == 2){
+                jumpString3 = "0" + jumpChannelNum;
+            }
+
+            if (channel.getChannelNumber().equals(jumpChannelNum) || channel.getChannelNumber().equals(jumpString2) || channel.getChannelNumber().equals(jumpString3))
+            {
+                saveChannelInfo(channel.getName());
+                if (arcPlayControl != null) {
+                    arcPlayControl.stop();
+                    arcPlayControl = null;
+                }
+                iFragmentJump.jumpToFramgment(LaunchType.TYPE_LIVE, 0);
+                isJumpTo = true;
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void goToTvBack() {
+        LogUtils.i("xumin", "FragmentRecommendBase goToTvBack" );
+        Bundle bundleRePlay = new Bundle();
+        bundleRePlay.putInt("lastLaunchType", curLaunchType);
+        int index = 0;
+        iFragmentJump.jumpToFragmentWithBundles(LaunchType.TYPE_REPLAY, index, bundleRePlay);
+        isJumpTo = true;
+
+    }
+
+    @Override
+    public void goToSchedule(String num, String name, String starttime, String startdate, String endtime, String enddate) {
+        LogUtils.i("xumin", "FragmentRecommendBase goToSchedule num: " + num + " name: " + name + " starttime: " + starttime + "startdate: " + startdate + "endtime: " + endtime + "enddate: " + enddate);
+        XunfeiTools.getInstance().sendLiveStatusBroadcast(mContext, false);
+        XunfeiTools.getInstance().sendBackPlayBroadcast(mContext, true);
+        isJumpTo = true;
+        int index = Integer.parseInt(playChannel.getChannelNumber());
+        LogUtils.i("xumin", "FragmentRecommendBase goToSchedule index: " + index);
+        Bundle bundle = new Bundle();
+        bundle.putString("xunfeinum", num);
+        bundle.putString("name", name);
+        bundle.putString("starttime", starttime);
+        bundle.putString("startdate", startdate);
+        bundle.putBoolean("isjumpto", isJumpTo);
+        bundle.putInt("lastLaunchType", curLaunchType);
+        iFragmentJump.jumpToFragmentWithBundles(LaunchType.TYPE_REPLAY, index, bundle);
+
     }
 }
 

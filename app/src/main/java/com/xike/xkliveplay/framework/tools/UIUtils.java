@@ -12,7 +12,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.xike.xkliveplay.activity.UniApplication;
+import com.xike.xkliveplay.activity.BaseApplication;
 
 
 public class UIUtils {
@@ -37,7 +37,7 @@ public class UIUtils {
      * @return
      */
     public static Context getContext() {
-        return UniApplication.getContext();
+        return BaseApplication.getContext();
     }
 
     /**
@@ -63,7 +63,7 @@ public class UIUtils {
      * @return
      */
     public static Handler getMainThreadHandler() {
-        return UniApplication.getMainHandler();
+        return BaseApplication.getMainHandler();
     }
 
     /**
@@ -145,7 +145,7 @@ public class UIUtils {
      * @return
      */
     public static long getMainThreadId() {
-        return UniApplication.getMainThreadId();
+        return BaseApplication.getMainThreadId();
     }
 
     /**
@@ -202,7 +202,7 @@ public class UIUtils {
      * version 1.0
      */
     public static int getScreenWidth() {
-        WindowManager wm = (WindowManager) UniApplication.getContext()
+        WindowManager wm = (WindowManager) BaseApplication.getContext()
                 .getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);
@@ -216,7 +216,7 @@ public class UIUtils {
      * version 1.0
      */
     public static int getScreenHeight() {
-        WindowManager wm = (WindowManager) UniApplication.getContext()
+        WindowManager wm = (WindowManager) BaseApplication.getContext()
                 .getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics outMetrics = new DisplayMetrics();
         wm.getDefaultDisplay().getMetrics(outMetrics);

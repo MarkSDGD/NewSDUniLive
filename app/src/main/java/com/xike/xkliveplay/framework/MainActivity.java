@@ -1,7 +1,7 @@
 package com.xike.xkliveplay.framework;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
 
 public class MainActivity extends Activity {
 

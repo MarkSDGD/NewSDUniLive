@@ -126,7 +126,10 @@ public class ZZChooseProductActivity extends FragmentActivity
 		if (method.equals(GDHttpTools.METHOD_ORDER_GETPRODUCTLISTINFO))
 		{
 			GDOrderPlayAuthCMHWRes res = GDHttpTools.getInstance().getGDOrderPlayAuthCMHWRes(contentId);
-			int count = res.getData().size();
+			int count=0;
+			if(res.getData()!=null){
+				count = res.getData().size();
+			}
 			for (int i = 0;i<count;i++)
 			{
 				ZZProduct product = new ZZProduct();

@@ -23,7 +23,6 @@ import com.xike.xkliveplay.activity.dialogerror.DialogBroadcastReceiver;
 import com.xike.xkliveplay.activity.dialogerror.gd.GDDialogTools;
 import com.xike.xkliveplay.activity.fragment.FragmentBackPlayBase;
 import com.xike.xkliveplay.activity.fragment.FragmentLivePlayBase;
-import com.xike.xkliveplay.activity.fragment.FragmentRecommendBase;
 import com.xike.xkliveplay.framework.entity.ActivateTerminal;
 import com.xike.xkliveplay.framework.entity.ActivateTerminalRes;
 import com.xike.xkliveplay.framework.entity.AuthRes;
@@ -142,12 +141,21 @@ public class ActivityLaunch extends ActivityLaunchBase {
         settings();
 
         super.onCreate(savedInstanceState);
-        NetStatusChange.getInstance().setiChanged(iChange);
+
         if (!NetStatusChange.getInstance().checkNet(this))        // Check network is ok.
         {
             return;
         }
+        beginStart();
+        Var.hasCalledBeginStart = true;
         startService(new Intent(this, LivePlayBackService.class));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        NetStatusChange.getInstance().setiChanged(iChange);
+        NetStatusChange.getInstance().reg(this);
     }
 
     private void settings() {
@@ -155,7 +163,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
         Var.isZZEnabled = true;
         GDHttpTools.getInstance().setGDOrderEnable(true);
         //		Toast.makeText(getApplicationContext(),"修改了SDK的域名为测试域名："+"http://223.99.253.49:8080",Toast.LENGTH_LONG).show();
-        //GDHttpTools.getInstance().setLiveUrl("http://223.99.253.49:8080");  //测试地址
+        //GDHttpTools.getInstance().setLiveUrl("http://223.99.253.49:80");  //测试地址
         VarParam.url = VarParam.CM_URL;
         VarParam.default_url = VarParam.CM_DEFAULT_URL;
         VarParam.update_url = VarParam.CM_UPDATE_URL;
@@ -164,54 +172,66 @@ public class ActivityLaunch extends ActivityLaunchBase {
     private INetStatusChanged iChange = new INetStatusChanged() {
         @Override
         public void onNetStatusChange(boolean isConnected) {
-            Log.i("MARK","onNetStatusChange isConnected=="+isConnected+"  curFragment=="+curFragment);
-            if (curFragment == null) {
-                //		    	readDefault();
-                //首先要赋值tag，也就是需要进行getAIDL访问
-                int tag = 1;
-                GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", new IUpdateData() {
-                    @Override
-                    public void updateData(String method, String uniId, Object object, boolean isSuccess) {
-                        if (isSuccess && method.equals(GDHttpTools.METHOD_GETAIDLDATA)) {
-                            GDAuthAidlRes res = (GDAuthAidlRes) object;
-                            String operaTag = "";
-                            if (res.getData().getOperaTag().equals("HW")) {
-                                operaTag = "1";
-                            } else if (res.getData().getOperaTag().equals("ZTE")) {
-                                operaTag = "2";
-                            }
-                            GDHttpTools.getInstance().setTag(operaTag);
-                        }
+            LogUtil.i("MARKMARK", "onNetStatusChange", "isConnected:" + isConnected + " hasCalledBeginStart==" + Var.hasCalledBeginStart + "  curFragment==" + curFragment);
+            if (isConnected) {
+                if (Var.hasCalledBeginStart) {
+                    Var.hasCalledBeginStart=false;
+                } else {
+                    if (curFragment == null) {
+                        beginStart();
+                    } else {
+                        LogUtil.i("MARKMARK", "onNetStatusChange", "curFragment!=null");
                     }
-                });
-                boolean isLiveStarted = (Boolean) MernakeSharedTools.get(getApplicationContext(), "isLiveStarted", false);
-                Log.i("MARK","isLiveStarted=="+isLiveStarted);
-                if (isLiveStarted) { //如果为真，则说明直播已经启动过了
-                    boolean jumpSign = (Boolean) MernakeSharedTools.get(getApplicationContext(), "jumpSign", false);
-                    Log.i("MARK","jumpSign=="+jumpSign);
-                    if (jumpSign) { //如果为真，说明要跳过
-                        //Log.i("MARK","paramSetting2()=="+paramSetting2());
-                        if (!paramSetting2()) { //如果paramSetting的返回值是真就不用处理，会直接跳转直播的
-                            //如果是假的，说明缓存缺失，按照旭哥的逻辑，应该是去读取预置频道列表的
-                            readDefault();
-                        }
-                    } else {//如果为假，说明不能跳过
-                        GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", iGDupdata);
-                    }
-                } else { //说明这次启动机顶盒之后，直播还没有启动过
-                    GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", iGDupdata);
                 }
-            }else if(curFragment instanceof FragmentRecommendBase){
-                if (!NetStatusChange.getInstance().checkNet(ActivityLaunch.this))        // Check network is ok.
-                {
-                    return;
-                }else{
-                    ((FragmentRecommendBase)curFragment).getData();
+            }else{
+                if (Var.hasCalledBeginStart) {
+                    Var.hasCalledBeginStart=false;
                 }
             }
+
         }
     };
 
+    private void beginStart() {
+
+        LogUtil.i("MARKMARK", "beginStart()", " beginStart() ");
+        //		    	readDefault();
+        //首先要赋值tag，也就是需要进行getAIDL访问
+        int tag = 1;
+        GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", new IUpdateData() {
+            @Override
+            public void updateData(String method, String uniId, Object object, boolean isSuccess) {
+                if (isSuccess && method.equals(GDHttpTools.METHOD_GETAIDLDATA)) {
+                    GDAuthAidlRes res = (GDAuthAidlRes) object;
+                    String operaTag = "";
+                    if (res.getData().getOperaTag().equals("HW")) {
+                        operaTag = "1";
+                    } else if (res.getData().getOperaTag().equals("ZTE")) {
+                        operaTag = "2";
+                    }
+                    GDHttpTools.getInstance().setTag(operaTag);
+                }
+            }
+        });
+        boolean isLiveStarted = (Boolean) MernakeSharedTools.get(getApplicationContext(), "isLiveStarted", false);
+        LogUtil.i("MARKMARK", "beginStart() updateData isLiveStarted", "isLiveStarted:" + isLiveStarted);
+
+        if (isLiveStarted) { //如果为真，则说明直播已经启动过了
+            boolean jumpSign = (Boolean) MernakeSharedTools.get(getApplicationContext(), "jumpSign", false);
+            LogUtil.i("MARKMARK", "beginStart() updateData jumpSign", "jumpSign:" + jumpSign);
+
+            if (jumpSign) { //如果为真，说明要跳过
+                if (!paramSetting2()) { //如果paramSetting的返回值是真就不用处理，会直接跳转直播的
+                    //如果是假的，说明缓存缺失，按照旭哥的逻辑，应该是去读取预置频道列表的
+                    readDefault();
+                }
+            } else {//如果为假，说明不能跳过
+                GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", iGDupdata);
+            }
+        } else { //说明这次启动机顶盒之后，直播还没有启动过
+            GDHttpTools.getInstance().getAIDLData(getApplicationContext(), tag + "", iGDupdata);
+        }
+    }
     private boolean isUseDefault = false;
 
     private void readDefault() {
@@ -642,6 +662,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
 
     @Override
     public void jumpToFragment() {
+        Log.i("MARK", "ActivityLaunch jumpToFragment ");
 
         if (getIntent().getExtras() != null && getIntent().getExtras().containsKey("xunfeinum")) //解决讯飞跳转
         {
@@ -705,7 +726,7 @@ public class ActivityLaunch extends ActivityLaunchBase {
                 break;
             case LaunchType.TYPE_RECOMMEND:
                 curFragment = new FragmentRecommend(this);
-                Log.e("xumin", "jumpToFragment: FragmentRecommend");
+                Log.i("MARK", "jumpToFragment: FragmentRecommend");
                 break;
             default:
                 break;
@@ -867,12 +888,13 @@ public class ActivityLaunch extends ActivityLaunchBase {
                 //鉴权已经成功，开始请求epg
                 //如果10000-1说明是鉴权成功，一切需要重新请求
                 //如果10000-2说明是跳过鉴权成功，检查缓存有就进入直播，没有再请求缓存
-                if (!paramSetting2()) {
+              //  if (!paramSetting2()) {
+                    MernakeSharedTools.set(getApplicationContext(),"jumpSign",true);
                     if (Var.isStatic)
                         GDHttpTools.getInstance().getStaticLiveCategoryList(GDHttpTools.getInstance().getTag(), iGDupdata);
                     else
                         GDHttpTools.getInstance().getLiveCategoryList(GDHttpTools.getInstance().getTag(), Var.userId, Var.userToken, iGDupdata);
-                }
+                //}
                 //                if (res.getCode().equals("10000-2"))
                 //                {
                 //                    if (!paramSetting2()) GDHttpTools.getInstance().getStaticLiveCategoryList(GDHttpTools.getInstance().getTag(),iGDupdata);
